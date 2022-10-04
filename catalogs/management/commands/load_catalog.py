@@ -51,29 +51,28 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS(f"Successfully ingested catalog '{name}'"))
 
     @staticmethod
-    def _parse_standard_catalog_path(path: Path) -> Tuple[str, str, str]:
+    def _parse_standard_catalog_path(path: Path) -> Tuple[str, str, str, str]:
         """Parse Catalog information from the standard catalog naming convention and path."""
-        version = f"CMS_ARS_{path.parent.name.replace('.', '_')}"
+        catalog = path.parent.parent.name
+        version = path.parent.name.replace('.', '_')
         impact_level_match = re.search(r"(?P<impact_level>high|HIGH|moderate|MODERATE|low|LOW)", path.name)
         impact_level = impact_level_match.groupdict()["impact_level"].lower()
-        name = f"{version}_{impact_level.upper()}"
+        name = f"{catalog}_{version}_{impact_level.upper()}"
+        source = f"{catalog}_{version}"
 
-        return version, impact_level, name
+        return version, impact_level, name, source
 
     def _load_standards(self):
         """Load standard catalogs from catalogs/data"""
-        # source = "https://github.com/CMSgov/ars-machine-readable"  # See catalogs/data/README.md
-        #
-        # catalogs_path = Path(__file__).parents[2] / "data"
-        # catalog_files = list(catalogs_path.rglob("*json"))
-        # catalog_defs = [self._parse_standard_catalog_path(path) for path in catalog_files]
-        #
-        # for (version, impact_level, name), file in zip(catalog_defs, catalog_files):
-        file = Path("catalogs/data/nist/rev5/NIST_SP-800-53_rev5_catalog.json")
-        self._load_catalog(
-            input_file=file,
-            name="NIST_800-53_rev_5",
-            version="rev_5",
-            impact_level="high",
-            source="https://raw.githubusercontent.com/usnistgov/oscal-content/main/nist.gov/SP800-53/rev5/json/NIST_SP-800-53_rev5_catalog.json"
-        )
+        catalogs_path = Path(__file__).parents[2].joinpath("data/NIST_SP-800-53")
+        catalog_files = list(catalogs_path.rglob("*json"))
+        catalog_defs = [self._parse_standard_catalog_path(path) for path in catalog_files]
+
+        for (version, impact_level, name, source), file in zip(catalog_defs, catalog_files):
+            self._load_catalog(
+                input_file=file.relative_to(file.parents[4]),
+                name=name,
+                version=version,
+                impact_level=impact_level,
+                source=f"https://raw.githubusercontent.com/usnistgov/oscal-content/main/nist.gov/SP800-53/{version}/json/{source}_catalog.json"
+            )
