@@ -2,8 +2,8 @@ import os
 
 from typing import List
 
+from blueprintapi.oscal.catalog import CatalogModel
 from catalogs.catalogio import CatalogTools
-from catalogs.io.v5_0 import CatalogModel
 from catalogs.models import Catalog, Controls
 
 

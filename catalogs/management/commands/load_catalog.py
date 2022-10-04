@@ -62,17 +62,18 @@ class Command(BaseCommand):
 
     def _load_standards(self):
         """Load standard catalogs from catalogs/data"""
-        source = "https://github.com/CMSgov/ars-machine-readable"  # See catalogs/data/README.md
-
-        catalogs_path = Path(__file__).parents[2] / "data"
-        catalog_files = list(catalogs_path.rglob("*json"))
-        catalog_defs = [self._parse_standard_catalog_path(path) for path in catalog_files]
-
-        for (version, impact_level, name), file in zip(catalog_defs, catalog_files):
-            self._load_catalog(
-                input_file=file.relative_to(file.parents[3]),
-                name=name,
-                version=version,
-                impact_level=impact_level,
-                source=source
-            )
+        # source = "https://github.com/CMSgov/ars-machine-readable"  # See catalogs/data/README.md
+        #
+        # catalogs_path = Path(__file__).parents[2] / "data"
+        # catalog_files = list(catalogs_path.rglob("*json"))
+        # catalog_defs = [self._parse_standard_catalog_path(path) for path in catalog_files]
+        #
+        # for (version, impact_level, name), file in zip(catalog_defs, catalog_files):
+        file = Path("catalogs/data/nist/rev5/NIST_SP-800-53_rev5_catalog.json")
+        self._load_catalog(
+            input_file=file,
+            name="NIST_800-53_rev_5",
+            version="rev_5",
+            impact_level="high",
+            source="https://raw.githubusercontent.com/usnistgov/oscal-content/main/nist.gov/SP800-53/rev5/json/NIST_SP-800-53_rev5_catalog.json"
+        )

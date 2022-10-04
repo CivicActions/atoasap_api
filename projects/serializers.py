@@ -2,13 +2,13 @@ from typing import Optional
 from rest_framework import serializers
 
 from catalogs.catalogio import CatalogTools
-from catalogs.io.v5_0 import CatalogModel
 from catalogs.models import Catalog
 from catalogs.serializers import ControlSerializer
 from components.models import Component
 from components.serializers import ComponentListSerializer
 from projects.models import Project, ProjectControl
 
+from blueprintapi.oscal.catalog import CatalogModel
 from blueprintapi.oscal.component import Model as ComponentModel
 
 

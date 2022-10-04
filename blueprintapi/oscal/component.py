@@ -19,7 +19,7 @@ from blueprintapi.oscal.oscal import (
     OSCALElement,
     Property,
     ResponsibleRole,
-    SetParameter,
+    Parameter,
 )
 from catalogs.models import Catalog
 
@@ -61,7 +61,7 @@ class ImplementedRequirement(OSCALElement):
     description: MarkupMultiLine
     props: Optional[List[Property]]
     links: Optional[List[Link]]
-    set_parameters: Optional[List[SetParameter]]
+    set_parameters: Optional[List[Parameter]]
     responsible_roles: Optional[List[ResponsibleRole]]
     statements: Optional[List[Statement]]
     remarks: Optional[MarkupMultiLine]
@@ -97,7 +97,7 @@ class ImplementedRequirement(OSCALElement):
         self.statements.append(statement)
         return self
 
-    def add_parameter(self, set_parameter: SetParameter):
+    def add_parameter(self, set_parameter: Parameter):
         key = set_parameter.param_id
         if not self.set_parameters:
             self.set_parameters = []
