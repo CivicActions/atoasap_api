@@ -37,9 +37,6 @@ class FilterMixin:
     def _get_part(self, key: str) -> "Part":
         return self._filter_list_field(key, field="parts")
 
-    def _get_param(self, key: str) -> "Parameter":
-        return self._filter_list_field(key, field="params")
-
     @property
     def label(self) -> str:
         prop = self._get_prop("label")
@@ -82,7 +79,7 @@ class Control(BaseControl, FilterMixin):
         return self._get_part("statement")
 
     @property
-    def implementation(self) -> Optional[str]:
+    def implementation(self) -> str:
         part = self._get_part("implementation")
 
         if not part:
@@ -102,8 +99,8 @@ class Control(BaseControl, FilterMixin):
     @property
     def description(self) -> Optional[str]:
         def _get_prose(item, depth=0):
-            depth += 1
             tabs = "\t" * depth
+            depth += 1
 
             if prose := getattr(item, "prose", ""):
                 prose = f"\n{tabs}{item.label} {prose}"
@@ -114,9 +111,9 @@ class Control(BaseControl, FilterMixin):
                     _get_prose(part, depth)
 
         parts: list = []
-        _get_prose(self.statement, depth=-3)
-
-        return "".join(parts).strip()
+        _get_prose(self.statement, depth=0)
+        
+        return "".join(parts)
 
     def to_orm(self) -> dict:
         return {
