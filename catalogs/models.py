@@ -1,6 +1,6 @@
 import json
-import jsonschema
 
+import jsonschema
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from jsonschema.exceptions import SchemaError, ValidationError
@@ -16,7 +16,9 @@ def validate_catalog(file_name):
     except ValidationError as exc:
         raise ValidationError("The Catalog is not a valid OSCAL catalog.") from exc
     except SchemaError as exc:
-        raise ValidationError("The Catalog schema is not a valid OSCAL catalog schema.") from exc
+        raise ValidationError(
+            "The Catalog schema is not a valid OSCAL catalog schema."
+        ) from exc
 
 
 class Catalog(models.Model):
@@ -26,8 +28,8 @@ class Catalog(models.Model):
         HIGH = "high", _("High")
 
     class Version(models.TextChoices):
-        CMS_ARS_3_1 = "CMS_ARS_3_1", _("CMS ARS 3.1")
-        CMS_ARS_5_0 = "CMS_ARS_5_0", _("CMS ARS 5.0")
+        NIST_800_53_r5 = "NIST_800_53_rev5", _("NIST 800-53 rev5")
+        NIST_800_53_r4 = "NIST_800_53_rev4", _("NIST 800-53 rev4")
 
     name = models.CharField(max_length=100, help_text="Name of Catalog", unique=True)
     file_name = models.FileField(
@@ -43,9 +45,9 @@ class Catalog(models.Model):
     )
     version = models.CharField(
         choices=Version.choices,
-        max_length=16,
+        max_length=24,
         blank=False,
-        default=Version.CMS_ARS_3_1,
+        default=Version.NIST_800_53_r5,
     )
     impact_level = models.CharField(
         choices=ImpactLevel.choices,

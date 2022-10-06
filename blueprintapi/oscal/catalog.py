@@ -1,11 +1,14 @@
 import json
 import logging
-
-from datetime import datetime
 from pathlib import Path
 from typing import Literal, Optional, Union
 
-from pydantic import BaseModel, Field, UUID4, ValidationError, validator  # pylint: disable=no-name-in-module
+from pydantic import (  # pylint: disable=no-name-in-module
+    UUID4,
+    BaseModel,
+    ValidationError,
+    validator,
+)
 
 from blueprintapi.oscal.oscal import Link, Metadata, OSCALElement, Parameter, Property
 
@@ -42,7 +45,7 @@ class FilterMixin:
         prop = self._get_prop("label")
 
         if not prop:
-            return self.id
+            return self.id  # type: ignore
 
         return prop.value
 
@@ -79,7 +82,7 @@ class Control(BaseControl, FilterMixin):
         return self._get_part("statement")
 
     @property
-    def implementation(self) -> str:
+    def implementation(self) -> Optional[str]:
         part = self._get_part("implementation")
 
         if not part:
@@ -88,7 +91,7 @@ class Control(BaseControl, FilterMixin):
         return part.prose
 
     @property
-    def guidance(self) -> str:
+    def guidance(self) -> Optional[str]:
         part = self._get_part("guidance")
 
         if not part:
@@ -97,20 +100,20 @@ class Control(BaseControl, FilterMixin):
         return part.prose
 
     @property
-    def description(self) -> str:
+    def description(self) -> Optional[str]:
         def _get_prose(item, depth=0):
             depth += 1
             tabs = "\t" * depth
 
             if prose := getattr(item, "prose", ""):
-                prose = f"\n{tabs}{item.label}. {prose}"
+                prose = f"\n{tabs}{item.label} {prose}"
                 parts.append(prose)
 
             if parts_ := getattr(item, "parts", []):
                 for part in parts_:
                     _get_prose(part, depth)
 
-        parts = []
+        parts: list = []
         _get_prose(self.statement, depth=-3)
 
         return "".join(parts).strip()
@@ -120,7 +123,7 @@ class Control(BaseControl, FilterMixin):
             "control_id": self.id,
             "control_label": self.label,
             "sort_id": self.sort_id,
-            "title": self.title
+            "title": self.title,
         }
 
 
@@ -133,7 +136,9 @@ class Group(OSCALElement):
     controls: list[Control]
 
     @validator("controls")
-    def set_family_id(cls, value: list[Control], values) -> list[Control]:  # pylint: disable=no-self-argument
+    def set_family_id(
+        cls, value: list[Control], values
+    ) -> list[Control]:  # pylint: disable=no-self-argument
         for item in value:
             if not item.family_id:
                 item.family_id = values.get("id")
@@ -148,10 +153,15 @@ class CatalogModel(BaseModel):
 
     @property
     def controls(self) -> list[Control]:
-        return sorted((item for group in self.groups for item in group.controls), key=lambda control: control.sort_id)
+        return sorted(
+            (item for group in self.groups for item in group.controls),
+            key=lambda control: control.sort_id,
+        )
 
     def get_control(self, control_id: str) -> Optional[Control]:
-        return next(filter(lambda control: control.id == control_id, self.controls), None)
+        return next(
+            filter(lambda control: control.id == control_id, self.controls), None
+        )
 
     def get_next(self, control: Control) -> str:
         try:
@@ -172,8 +182,7 @@ class CatalogModel(BaseModel):
             "description": control.description,
             "implementation": control.implementation,
             "guidance": control.guidance,
-            "next_id": next_id
-
+            "next_id": next_id,
         }
 
     @classmethod

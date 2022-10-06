@@ -26,12 +26,12 @@ def _add_project_controls(instance: Project):
 
 def _add_default_component(instance: Project, group: Group):
     default_json = create_empty_component_json(
-        title=f"{instance.title} private",
+        title=f"{instance.title} This System",
         catalog_version=instance.catalog.version,
-        impact_level=instance.impact_level
+        impact_level=instance.impact_level,
     )
     default = Component(
-        title=f"{instance.title} private",
+        title=f"{instance.title} This System",
         description=f"{instance.title} default system component",
         component_json=json.loads(default_json),
         status=1,
@@ -52,20 +52,10 @@ def _add_default_component(instance: Project, group: Group):
     instance.components.add(default)
 
 
-def _add_components_for_project(instance: Project):
-    try:
-        ociso_component = Component.objects.get(title__iexact="ociso")
-        instance.components.add(ociso_component)
-        # if location aws add the aws component
-        if instance.location == "cms_aws":
-            aws_component = Component.objects.get(title__iexact="aws")
-            instance.components.add(aws_component)
-    except Component.DoesNotExist as exc:
-        logger.warning("Inherited components not found: %s", exc)
-
-
 # noinspection PyUnusedLocal
-def post_create_setup(sender, instance: Project, created: bool, **kwargs):  # pylint: disable=unused-argument
+def post_create_setup(
+    sender, instance: Project, created: bool, **kwargs
+):  # pylint: disable=unused-argument
     """Additional project set up after successful creation"""
     if created:
         # Create groups for project with associated permissions
@@ -82,9 +72,6 @@ def post_create_setup(sender, instance: Project, created: bool, **kwargs):  # py
         # Add default/system component; depends on group existing
         _add_default_component(instance, project_admin_group)
 
-        # Add "standard" components
-        _add_components_for_project(instance)
-
         # Add catalog controls to project.
         _add_project_controls(instance)
 
@@ -93,11 +80,17 @@ def post_create_setup(sender, instance: Project, created: bool, **kwargs):  # py
 def add_catalog(sender, instance: Project, **kwargs):  # pylint: disable=unused-argument
     if not hasattr(instance, "catalog"):
         if not (instance.impact_level and instance.catalog_version):
-            raise ValidationError("Creating a new project requires impact_level and catalog_version.")
+            raise ValidationError(
+                "Creating a new project requires impact_level and catalog_version."
+            )
 
         try:
-            catalog = Catalog.objects.get(impact_level=instance.impact_level, version=instance.catalog_version)
+            catalog = Catalog.objects.get(
+                impact_level=instance.impact_level, version=instance.catalog_version
+            )
             logger.info("Adding matching catalog, %s to project, %s", catalog, instance)
             instance.catalog = catalog
         except Catalog.DoesNotExist as exc:
-            raise Catalog.DoesNotExist("Could not determine a matching catalog for project.") from exc
+            raise Catalog.DoesNotExist(
+                "Could not determine a matching catalog for project."
+            ) from exc
