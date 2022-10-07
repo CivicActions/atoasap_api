@@ -1,7 +1,7 @@
 import json
 import logging
 from pathlib import Path
-from typing import Literal, Optional, Union
+from typing import Literal, Optional, Tuple, Union
 
 from pydantic import (  # pylint: disable=no-name-in-module
     UUID4,
@@ -97,6 +97,14 @@ class Control(BaseControl, FilterMixin):
         return part.prose
 
     @property
+    def parameters(self) -> dict:
+        params = self.params
+        parameters = {}
+        for p in params:
+            parameters[p.id] = p.get_odp_text
+        return parameters
+
+    @property
     def description(self) -> Optional[str]:
         def _get_prose(item, depth=0):
             tabs = "\t" * depth
@@ -112,8 +120,13 @@ class Control(BaseControl, FilterMixin):
 
         parts: list = []
         _get_prose(self.statement, depth=0)
-        
-        return "".join(parts)
+        description = "".join(parts)
+
+        params = self.parameters
+        for key, value in params.items():
+            placeholder = "{{ insert: param, " + key + " }}"
+            description = description.replace(placeholder, value)
+        return description
 
     def to_orm(self) -> dict:
         return {

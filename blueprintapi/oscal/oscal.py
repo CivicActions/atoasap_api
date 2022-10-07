@@ -272,6 +272,18 @@ class Select(OSCALElement):
     how_many: Optional[str]
     choice: Optional[List[Choice]]
 
+    @property
+    def get_select_text(self):
+        text = ""
+        if hasattr(self, "how_many"):
+            label = getattr(self, "how_many").replace("-", " ")
+            text += f"Selection ({label}): "
+        if hasattr(self, "choice"):
+            ch = []
+            [ch.append(c) for c in getattr(self, "choice")]
+            text += ", ".join(ch)
+        return text
+
 
 class RoleIDEnum(str, Enum):
     asset_administrator = "asset-administrator"
@@ -362,6 +374,23 @@ class Parameter(OSCALElement):
     values: List[str] = []
     select: Optional[Select]
     remarks: Optional[MarkupMultiLine]
+
+    @property
+    def get_odp_text(self):
+        if guidelines := getattr(self, "guidelines"):
+            gl = []
+            [gl.append(g.prose) for g in guidelines]
+            text = " ".join(gl)
+        elif select := getattr(self, "select"):
+            text = select.get_select_text
+        elif values := getattr(self, "values"):
+            vl = []
+            [vl.append(v) for v in values]
+            text = " ".join(vl)
+        else:
+            text = self.label
+
+        return text
 
 
 class ResponsibleRole(OSCALElement):
