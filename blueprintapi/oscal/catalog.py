@@ -142,8 +142,14 @@ class Group(OSCALElement):
         fields = {"item_class": "class"}
         allow_population_by_field_name = True
 
+    id: Optional[str]
     item_class: Literal["family"]
-    controls: list[Control]
+    title: str
+    params: Optional[list[Parameter]] = []
+    props: Optional[list[Property]] = []
+    parts: Optional[list["Part"]] = []
+    groups: Optional[list["Group"]]
+    controls: Optional[list[Control]]
 
     @validator("controls")
     def set_family_id(
@@ -173,6 +179,12 @@ class CatalogModel(BaseModel):
             filter(lambda control: control.id == control_id, self.controls), None
         )
 
+    def get_group(self, control_id: str) -> list[Group]:
+        for group in self.groups:
+            for control in group.controls:
+                if control.id == control_id:
+                    return group
+
     def get_next(self, control: Control) -> str:
         try:
             next_idx = self.controls.index(control) + 1
@@ -182,13 +194,14 @@ class CatalogModel(BaseModel):
 
     def control_summary(self, control_id: str) -> dict:
         control = self.get_control(control_id)
+        group = self.get_group(control_id)
         next_id = self.get_next(control)
 
         return {
             "label": control.label,
             "sort_id": control.sort_id,
             "title": control.title,
-            "family": control.family_id,
+            "family": group.title,
             "description": control.description,
             "implementation": control.implementation,
             "guidance": control.guidance,
