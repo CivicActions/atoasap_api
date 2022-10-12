@@ -1,15 +1,13 @@
 from typing import Optional
+
 from rest_framework import serializers
 
-from catalogs.catalogio import CatalogTools
-from catalogs.io.v5_0 import CatalogModel
-from catalogs.models import Catalog
+from blueprintapi.oscal.catalog import CatalogModel
+from blueprintapi.oscal.component import ComponentModel as ComponentModel
 from catalogs.serializers import ControlSerializer
 from components.models import Component
 from components.serializers import ComponentListSerializer
 from projects.models import Project, ProjectControl
-
-from blueprintapi.oscal.component import Model as ComponentModel
 
 
 class ProjectListSerializer(serializers.ModelSerializer):
@@ -30,7 +28,13 @@ class ProjectListSerializer(serializers.ModelSerializer):
             "completed_controls",
             "total_controls",
         )
-        read_only_fields = ("id", "creator", "catalog", "completed_controls", "total_controls", )
+        read_only_fields = (
+            "id",
+            "creator",
+            "catalog",
+            "completed_controls",
+            "total_controls",
+        )
 
     def create(self, validated_data):
         return Project.objects.create(
@@ -64,22 +68,37 @@ class ProjectSerializer(serializers.ModelSerializer):
             "completed_controls",
             "total_controls",
         )
-        read_only_fields = ("id", "creator", "completed_controls", "total_controls", )
+        read_only_fields = (
+            "id",
+            "creator",
+            "completed_controls",
+            "total_controls",
+        )
         depth = 1
 
 
 class BasicViewProjectSerializer(serializers.ModelSerializer):
     """Project serializer for the case where only basic project info is needed."""
+
     private_component = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Project
-        fields = ("id", "title", "acronym", "private_component", )
-        read_only_fields = ("id", "title", "acronym", )
+        fields = (
+            "id",
+            "title",
+            "acronym",
+            "private_component",
+        )
+        read_only_fields = (
+            "id",
+            "title",
+            "acronym",
+        )
 
     # noinspection PyMethodMayBeStatic
     def get_private_component(self, obj: Project) -> int:
-        return obj.components.get(title=f"{obj.title} private").id
+        return obj.components.get(title=f"{obj.title} This System").id
 
 
 class ProjectControlSerializer(serializers.ModelSerializer):
@@ -87,8 +106,12 @@ class ProjectControlSerializer(serializers.ModelSerializer):
     project = BasicViewProjectSerializer(read_only=True)
     catalog_data = serializers.SerializerMethodField(read_only=True)
     component_data = serializers.SerializerMethodField(read_only=True)
-    disable_narratives = serializers.ListSerializer(child=serializers.IntegerField(), write_only=True, required=False)
-    enable_narratives = serializers.ListSerializer(child=serializers.IntegerField(), write_only=True, required=False)
+    disable_narratives = serializers.ListSerializer(
+        child=serializers.IntegerField(), write_only=True, required=False
+    )
+    enable_narratives = serializers.ListSerializer(
+        child=serializers.IntegerField(), write_only=True, required=False
+    )
 
     class Meta:
         model = ProjectControl
@@ -105,7 +128,9 @@ class ProjectControlSerializer(serializers.ModelSerializer):
 
     def validate(self, attrs):
         if attrs.get("status") == ProjectControl.Status.NA and not attrs.get("remarks"):
-            raise serializers.ValidationError("A justification is required for non-applicable controls.")
+            raise serializers.ValidationError(
+                "A justification is required for non-applicable controls."
+            )
         return attrs
 
     def validate_disable_narratives(self, value: list[int]) -> list[int]:
@@ -115,16 +140,22 @@ class ProjectControlSerializer(serializers.ModelSerializer):
                 invalid.append(item)
 
         if invalid:
-            raise serializers.ValidationError(f"Invalid ids are present in 'disabled_narratives': {invalid}")
+            raise serializers.ValidationError(
+                f"Invalid ids are present in 'disabled_narratives': {invalid}"
+            )
 
         return value
 
     def update(self, instance, validated_data):
         if disable := validated_data.get("disable_narratives"):
-            instance.disabled_narratives = list(set(instance.disabled_narratives).union(disable))
+            instance.disabled_narratives = list(
+                set(instance.disabled_narratives).union(disable)
+            )
 
         if enable := validated_data.get("enable_narratives"):
-            instance.disabled_narratives = list(set(instance.disabled_narratives).difference(enable))
+            instance.disabled_narratives = list(
+                set(instance.disabled_narratives).difference(enable)
+            )
 
         if status := validated_data.get("status"):
             instance.status = status
@@ -140,14 +171,10 @@ class ProjectControlSerializer(serializers.ModelSerializer):
         file = obj.control.catalog.file_name.path
         control_id = self.context.get("control_id")
 
-        match obj.project.catalog_version:
-            case Catalog.Version.CMS_ARS_3_1:
-                catalog = CatalogTools(file)
-                control_data = catalog.get_control_data_simplified(control_id=control_id)
-                control_data["version"] = catalog.catalog_title
-            case Catalog.Version.CMS_ARS_5_0:
-                catalog = CatalogModel.from_json(file)
-                control_data.update({"version": catalog.metadata.title, **catalog.control_summary(control_id)})
+        catalog = CatalogModel.from_json(file)
+        control_data.update(
+            {"version": catalog.metadata.title, **catalog.control_summary(control_id)}
+        )
 
         return control_data
 
@@ -162,10 +189,10 @@ class ProjectControlSerializer(serializers.ModelSerializer):
     def _get_control_data(obj: ProjectControl, control_id: str) -> dict:
         type_map = {
             Component.Status.PUBLIC: "inherited",
-            Component.Status.SYSTEM: "private"
+            Component.Status.SYSTEM: "private",
         }
 
-        result = {
+        result: dict = {
             "responsibility": "Allocated",
             "components": {"inherited": {}, "private": {"description": None}},
         }
@@ -176,10 +203,14 @@ class ProjectControlSerializer(serializers.ModelSerializer):
 
         for component in obj.project.components.all():
             enabled = component.id not in disabled_narratives
-            component_def = ComponentModel(**component.component_json).component_definition.components[0]
+            component_def = ComponentModel(
+                **component.component_json
+            ).component_definition.components[0]
 
             try:
-                control_data = component_def.get_control(control_id, catalog_version=catalog_version)
+                control_data = component_def.get_control(
+                    control_id, catalog_version=catalog_version
+                )
             except KeyError:
                 control_data = None
 
@@ -191,7 +222,7 @@ class ProjectControlSerializer(serializers.ModelSerializer):
                     result["components"][status] = {
                         "id": component.id,
                         "description": control_data.description,
-                        "enabled": enabled
+                        "enabled": enabled,
                     }
                 else:
                     # noinspection PyTypeChecker
@@ -200,7 +231,7 @@ class ProjectControlSerializer(serializers.ModelSerializer):
                         "description": control_data.description,
                         "responsibility": responsibility,
                         "provider": control_data.provider,
-                        "enabled": enabled
+                        "enabled": enabled,
                     }
 
         if len(responsibilities) > 1:
@@ -223,4 +254,9 @@ class ProjectControlListSerializer(serializers.ModelSerializer):
             "project",
             "remarks",
         )
-        read_only_fields = ("status", "control", "project", "remarks", )
+        read_only_fields = (
+            "status",
+            "control",
+            "project",
+            "remarks",
+        )

@@ -21,7 +21,7 @@ from .oscal import (
     ResponsibleParty,
     ResponsibleRole,
     Role,
-    SetParameter,
+    Parameter,
 )
 
 
@@ -367,7 +367,7 @@ class ByComponent(OSCALElement):
     description: MarkupMultiLine
     props: Optional[List[Property]]
     links: Optional[List[Link]]
-    set_parameters: Optional[List[SetParameter]]
+    set_parameters: Optional[List[Parameter]]
     implementation_status: Optional[List[ImplementationStatus]]
     export: Optional[Export]
     inherited: Optional[List[Inherited]]
@@ -419,7 +419,7 @@ class ImplementedRequirement(OSCALElement):
     control_id: NCName
     props: Optional[List[Property]]
     links: Optional[List[Link]]
-    set_parameters: Optional[List[SetParameter]]
+    set_parameters: Optional[List[Parameter]]
     responsible_roles: Optional[List[ResponsibleRole]]
     statements: Optional[List[Statement]]
     by_components: Optional[List[ByComponent]]
@@ -437,7 +437,7 @@ class ImplementedRequirement(OSCALElement):
         self.statements.append(statement)
         return self
 
-    def add_parameter(self, set_parameter: SetParameter):
+    def add_parameter(self, set_parameter: Parameter):
         key = set_parameter.param_id
         if not self.set_parameters:
             self.set_parameters = []
@@ -471,7 +471,7 @@ class ImplementedRequirement(OSCALElement):
 
 class ControlImplementation(OSCALElement):
     description: MarkupMultiLine
-    set_parameters: Optional[List[SetParameter]]
+    set_parameters: Optional[List[Parameter]]
     implemented_requirements: List[ImplementedRequirement]
 
     class Config:
@@ -570,7 +570,7 @@ def main():
     ir.add_by_component(
         ByComponent(component_uuid=drupal.uuid, description="AC-1 provided by Drupal")
     )
-    ir.add_parameter(SetParameter(param_id="AC-1_prm_1", values=["every 30 days"]))
+    ir.add_parameter(Parameter(param_id="AC-1_prm_1", values=["every 30 days"]))
     ir.add_statement(
         Statement(statement_id="AC-1_smt").add_by_component(
             ByComponent(

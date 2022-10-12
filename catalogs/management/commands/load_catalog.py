@@ -1,5 +1,4 @@
 import re
-
 from pathlib import Path
 from typing import Tuple
 
@@ -30,13 +29,19 @@ class Command(BaseCommand):
             create_kwargs = {}
             for arg in ("source", "catalog_version", "impact_level"):
                 if value := options[arg]:
-                    create_kwargs[arg if arg != "catalog_version" else "version"] = value
+                    create_kwargs[
+                        arg if arg != "catalog_version" else "version"
+                    ] = value
 
             self._load_catalog(input_file, name, **create_kwargs)
 
     def _load_catalog(self, input_file: Path, name: str, **catalog_args):
         if Catalog.objects.filter(name=name).exists():
-            self.stdout.write(self.style.WARNING(f"Catalog, {name} has already been loaded. Skipping."))
+            self.stdout.write(
+                self.style.WARNING(
+                    f"Catalog, {name} has already been loaded. Skipping."
+                )
+            )
             return
 
         try:
@@ -51,28 +56,34 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS(f"Successfully ingested catalog '{name}'"))
 
     @staticmethod
-    def _parse_standard_catalog_path(path: Path) -> Tuple[str, str, str]:
+    def _parse_standard_catalog_path(path: Path) -> Tuple[str, str, str, str]:
         """Parse Catalog information from the standard catalog naming convention and path."""
-        version = f"CMS_ARS_{path.parent.name.replace('.', '_')}"
-        impact_level_match = re.search(r"(?P<impact_level>high|HIGH|moderate|MODERATE|low|LOW)", path.name)
-        impact_level = impact_level_match.groupdict()["impact_level"].lower()
-        name = f"{version}_{impact_level.upper()}"
+        catalog = path.parent.parent.name.replace(".", "_").replace("-", "_")
+        version = path.parent.name.replace(".", "_")
+        impact_level_match = re.search(
+            r"(?P<impact_level>high|HIGH|moderate|MODERATE|low|LOW)", path.name
+        )
+        impact_level = impact_level_match.groupdict()["impact_level"].lower()  # type: ignore
+        name = f"{catalog}{version}_{impact_level.upper()}"
+        source = f"{catalog}{version}"
 
-        return version, impact_level, name
+        return version, impact_level, name, source
 
     def _load_standards(self):
         """Load standard catalogs from catalogs/data"""
-        source = "https://github.com/CMSgov/ars-machine-readable"  # See catalogs/data/README.md
-
-        catalogs_path = Path(__file__).parents[2] / "data"
+        catalogs_path = Path(__file__).parents[2].joinpath("data/NIST_SP80053")
         catalog_files = list(catalogs_path.rglob("*json"))
-        catalog_defs = [self._parse_standard_catalog_path(path) for path in catalog_files]
-
-        for (version, impact_level, name), file in zip(catalog_defs, catalog_files):
+        catalog_defs = [
+            self._parse_standard_catalog_path(path) for path in catalog_files
+        ]
+        base_path = "https://raw.githubusercontent.com/usnistgov/oscal-content/main/nist.gov/SP800-53"
+        for (version, impact_level, name, source), file in zip(
+            catalog_defs, catalog_files
+        ):
             self._load_catalog(
-                input_file=file.relative_to(file.parents[3]),
+                input_file=file.relative_to(file.parents[4]),
                 name=name,
-                version=version,
+                version=source,
                 impact_level=impact_level,
-                source=source
+                source=f"{base_path}/{version}/json/{source}_catalog.json",
             )

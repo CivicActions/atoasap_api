@@ -142,9 +142,16 @@ class OSCALElement(BaseModel):
 
 
 class Property(OSCALElement):
+    class Config:
+        fields = {"prop_class": "class"}
+        allow_population_by_field_name = True
+
     name: str
     value: str
+    ns: Optional[str]
     uuid: UUID = Field(default_factory=uuid4)
+    prop_class: Optional[str]
+    remarks: Optional[MarkupMultiLine]
 
 
 class Resource(OSCALElement):
@@ -162,19 +169,19 @@ class LinkRelEnum(str, Enum):
     interview_notes = "interview-notes"
     tool_output = "tool-output"
     photograph = "photograph"
-    questionaire = "questionaire"
+    questionnaire = "questionnaire"
     screen_shot = "screen-shot"
 
 
 class Link(OSCALElement):
-    text: str
-    href: str
-    rel: Optional[LinkRelEnum]
-    media_type: Optional[str]
-
     class Config:
         fields = {"media_type": "media-type"}
         allow_population_by_field_name = True
+
+    text: Optional[str]
+    href: str
+    rel: Optional[str]
+    media_type: Optional[str]
 
 
 class Annotation(OSCALElement):
@@ -199,16 +206,16 @@ class TelephoneNumber(OSCALElement):
 
 
 class Revision(OSCALElement):
+    class Config:
+        fields = {"last_modified": "last-modified", "oscal_version": "oscal-version"}
+        allow_population_by_field_name = True
+
     title: Optional[str]
     published: Optional[datetime]
     last_modified: Optional[datetime]
     version: Optional[str]
     oscal_version: Optional[str]
     props: Optional[List[Property]]
-
-    class Config:
-        fields = {"last_modified": "last-modified", "oscal_version": "oscal-version"}
-        allow_population_by_field_name = True
 
 
 class DocumentId(OSCALElement):
@@ -222,6 +229,14 @@ class PartyTypeEnum(str, Enum):
 
 
 class Party(OSCALElement):
+    class Config:
+        fields = {
+            "short_name": "short-name",
+            "email_addresses": "email-addresses",
+            "telephone-numbers": "telephone-numbers",
+        }
+        allow_population_by_field_name = True
+
     uuid: UUID = Field(default_factory=uuid4)
     type: PartyTypeEnum
     name: Optional[str]
@@ -233,18 +248,48 @@ class Party(OSCALElement):
     telephone_numbers: Optional[List[TelephoneNumber]]
     remarks: Optional[MarkupMultiLine]
 
-    class Config:
-        fields = {
-            "party_name": "party-name",
-            "short_name": "short-name",
-            "email_addresses": "email-addresses",
-            "telephone_numbers": "telephone-numbers",
-        }
-        allow_population_by_field_name = True
-
 
 class Location(OSCALElement):
     pass
+
+
+class Test(OSCALElement):
+    expression: str
+    remarks: Optional[MarkupMultiLine]
+
+
+class Constraint(OSCALElement):
+    description: Optional[MarkupMultiLine]
+    tests: Optional[List[Test]]
+
+
+class Guideline(OSCALElement):
+    prose: MarkupMultiLine
+
+
+class Choice(str):
+    choice: Optional[MarkupLine]
+
+
+class Select(OSCALElement):
+    class Config:
+        fields = {"how_many": "how-many"}
+        allow_population_by_field_name = True
+
+    how_many: Optional[str]
+    choice: Optional[List[Choice]]
+
+    @property
+    def get_select_text(self):
+        text = ""
+        if how_many := getattr(self, "how_many", None):
+            label = how_many.replace("-", " ")
+            text += f"Selection ({label}): "
+        if choice := getattr(self, "choice", None):
+            ch = []
+            [ch.append(c) for c in choice]
+            text += ", ".join(ch)
+        return text
 
 
 class RoleIDEnum(str, Enum):
@@ -271,7 +316,7 @@ class RoleIDEnum(str, Enum):
 
 
 class Role(OSCALElement):
-    id: RoleIDEnum
+    id: str
     title: MarkupLine
     short_name: Optional[str]
     description: Optional[MarkupMultiLine]
@@ -282,18 +327,28 @@ class Role(OSCALElement):
 
 
 class ResponsibleParty(OSCALElement):
-    role_id: RoleIDEnum
+    class Config:
+        fields = {"role_id": "role-id", "party_uuids": "party-uuids"}
+        allow_population_by_field_name = True
+
+    role_id: str
     party_uuids: List[UUID]
     props: Optional[List[Property]]
     links: Optional[List[Link]]
     remarks: Optional[MarkupMultiLine]
 
-    class Config:
-        fields = {"party_uuids": "party-uuids"}
-        allow_population_by_field_name = True
-
 
 class Metadata(OSCALElement):
+    class Config:
+        fields = {
+            "oscal_version": "oscal-version",
+            "document_ids": "document-ids",
+            "last_modified": "last-modified",
+            "responsible_parties": "responsible-parties",
+        }
+        exclude_if_false = ["responsible-parties"]
+        allow_population_by_field_name = True
+
     title: str
     published: datetime = datetime.now(timezone.utc)
     last_modified: datetime = datetime.now(timezone.utc)
@@ -309,34 +364,49 @@ class Metadata(OSCALElement):
     responsible_parties: Optional[List[ResponsibleParty]]
     remarks: Optional[MarkupMultiLine]
 
+
+class Parameter(OSCALElement):
     class Config:
-        fields = {
-            "oscal_version": "oscal-version",
-            "document_ids": "document-ids",
-            "last_modified": "last-modified",
-            "responsible_parties": "responsible-parties",
-        }
-        exclude_if_false = ["responsible-parties"]
+        fields = {"param_class": "class", "depends_on": "depends-on"}
         allow_population_by_field_name = True
 
-
-class SetParameter(OSCALElement):
-    param_id: NCName
+    id: NCName
+    param_class: Optional[str]
+    depends_on: Optional[str]
+    links: Optional[List[Link]]
+    label: Optional[MarkupLine]
+    usage: Optional[MarkupMultiLine]
+    constraints: Optional[List[Constraint]]
+    guidelines: Optional[List[Guideline]]
     values: List[str] = []
+    select: Optional[Select]
     remarks: Optional[MarkupMultiLine]
 
-    class Config:
-        fields = {"param_id": "param-id"}
-        allow_population_by_field_name = True
+    @property
+    def get_odp_text(self):
+        if guidelines := getattr(self, "guidelines"):
+            gl = []
+            [gl.append(g.prose) for g in guidelines]
+            text = " ".join(gl)
+        elif select := getattr(self, "select"):
+            text = select.get_select_text
+        elif values := getattr(self, "values"):
+            vl = []
+            [vl.append(v) for v in values]
+            text = " ".join(vl)
+        else:
+            text = self.label
+
+        return text
 
 
 class ResponsibleRole(OSCALElement):
+    class Config:
+        fields = {"role_id": "role-id", "party_uuids": "party-uuids"}
+        allow_population_by_field_name = True
+
     role_id: RoleIDEnum
     props: Optional[List[Property]]
     links: Optional[List[Link]]
     party_uuids: Optional[List[UUID]]
     remarks: Optional[MarkupMultiLine]
-
-    class Config:
-        fields = {"party_uuids": "party-uuids"}
-        allow_population_by_field_name = True

@@ -1,6 +1,6 @@
 import json
-import jsonschema
 
+import jsonschema
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from jsonschema.exceptions import SchemaError, ValidationError
@@ -16,7 +16,9 @@ def validate_catalog(file_name):
     except ValidationError as exc:
         raise ValidationError("The Catalog is not a valid OSCAL catalog.") from exc
     except SchemaError as exc:
-        raise ValidationError("The Catalog schema is not a valid OSCAL catalog schema.") from exc
+        raise ValidationError(
+            "The Catalog schema is not a valid OSCAL catalog schema."
+        ) from exc
 
 
 class Catalog(models.Model):
@@ -26,8 +28,8 @@ class Catalog(models.Model):
         HIGH = "high", _("High")
 
     class Version(models.TextChoices):
-        CMS_ARS_3_1 = "CMS_ARS_3_1", _("CMS ARS 3.1")
-        CMS_ARS_5_0 = "CMS_ARS_5_0", _("CMS ARS 5.0")
+        NIST_SP80053r5 = "NIST_SP80053r5", _("NIST 800-53 r5")
+        NIST_SP80053r4 = "NIST_SP80053r4", _("NIST 800-53 r4")
 
     name = models.CharField(max_length=100, help_text="Name of Catalog", unique=True)
     file_name = models.FileField(
@@ -39,13 +41,13 @@ class Catalog(models.Model):
         max_length=500,
         null=False,
         default="https://raw.githubusercontent.com/usnistgov/oscal-content/main/nist.gov/"
-        "SP800-53/rev5/json/NIST_SP-800-53_rev5_catalog.json",
+        "SP800-53/r5/json/NIST_SP-800-53_rev5_catalog.json",
     )
     version = models.CharField(
         choices=Version.choices,
-        max_length=16,
+        max_length=24,
         blank=False,
-        default=Version.CMS_ARS_3_1,
+        default=Version.NIST_SP80053r5,
     )
     impact_level = models.CharField(
         choices=ImpactLevel.choices,

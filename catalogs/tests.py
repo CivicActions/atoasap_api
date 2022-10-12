@@ -4,10 +4,9 @@ from django.test import TestCase
 from django.urls import reverse
 from rest_framework import status
 
-from testing_utils import AuthenticatedAPITestCase, prevent_request_warnings
-
 from catalogs.catalogio import CatalogTools as Tools
 from catalogs.models import Catalog, Controls
+from testing_utils import AuthenticatedAPITestCase, prevent_request_warnings
 
 
 class CatalogModelTest(AuthenticatedAPITestCase):
@@ -50,26 +49,28 @@ class LoadCatalogCommandTestCase(TestCase):
     def test_load_standard_catalogs(self):
         test_cases = [
             {
-                "name": "CMS_ARS_3_1_HIGH",
-                "version": Catalog.Version.CMS_ARS_3_1,
-                "impact_level": "high"
+                "name": "NIST_SP80053r4_HIGH",
+                "version": f"{Catalog.Version.NIST_SP80053r4}",
+                "impact_level": "high",
             },
             {
-                "name": "CMS_ARS_3_1_LOW",
-                "version": Catalog.Version.CMS_ARS_3_1,
-                "impact_level": "low"
+                "name": "NIST_SP80053r4_LOW",
+                "version": f"{Catalog.Version.NIST_SP80053r4}",
+                "impact_level": "low",
             },
             {
-                "name": "CMS_ARS_3_1_MODERATE",
-                "version": Catalog.Version.CMS_ARS_3_1,
-                "impact_level": "moderate"
+                "name": "NIST_SP80053r4_MODERATE",
+                "version": f"{Catalog.Version.NIST_SP80053r4}",
+                "impact_level": "moderate",
             },
         ]
         call_command("load_catalog", load_standard_catalogs=True)
 
-        catalog_qs = Catalog.objects.order_by("name").values("name", "impact_level", "version")
+        catalog_qs = Catalog.objects.order_by("name").values(
+            "name", "impact_level", "version"
+        )
         self.assertEqual(catalog_qs.count(), 6)
-        self.assertEqual(Controls.objects.count(), 1882)
+        self.assertEqual(Controls.objects.count(), 1534)
 
         for expected, actual in zip(test_cases, catalog_qs):
             with self.subTest(catalog=expected["name"]):

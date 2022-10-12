@@ -17,8 +17,8 @@
         "control-implementations": [
           {
             "uuid": "6d7442a0-c914-4e09-b480-ab18b8b4a937",
-            "source": "https://raw.githubusercontent.com/CMSgov/ars-machine-readable/main/3.1/oscal/json/CMS_ARS_3_1_catalog.json",
-            "description": "CMS_ARS_3_1",
+            "source": "https://raw.githubusercontent.com/usnistgov/oscal-content/main/nist.gov/SP800-53/rev5/json/NIST_800_53_rev5_catalog.json",
+            "description": "NIST_SP80053r5",
             "implemented-requirements": [
               {
                 "uuid": "361bc30e-32c2-448c-8854-253d0fa34380",
@@ -38,7 +38,7 @@
                   {
                     "statement-id": "ca-7_smt.e",
                     "uuid": "9539fb44-3ecd-4492-8c6f-d2ad33b365e5",
-                    "description": "When there is a significant change to the system, a Security Risk Assessment is performed to evaluate the state of the sytem security controls based on the change. Vulnerabilities discovered by the SRA or through pen-tests are tracked monthly by the system owner and ISSO as part of POA&M documented in CFACTS. CMS Cloud establishes baselines for the system and scans the system with Nessus when changes occur within the system to ensure compliance with established baselines"
+                    "description": "When there is a significant change to the system, a Security Risk Assessment is performed to evaluate the state of the sytem security controls based on the change. Vulnerabilities discovered by the SRA or through pen-tests are tracked monthly by the system owner and ISSO as part of POA&M documentation. The application team establishes baselines for the system and scans the system with Nessus when changes occur within the system to ensure compliance with established baselines"
                   }
                 ]
               },
@@ -108,12 +108,12 @@
               {
                 "uuid": "9d34d291-0a16-436d-b305-aa82e2cbe1be",
                 "control-id": "ra-5.5",
-                "description": "Tenable supports privileged access authorization to operating system, telecommunications, and configuration components employing credentials that meet CMS authentication requirements."
+                "description": "Tenable supports privileged access authorization to operating system, telecommunications, and configuration components employing credentials that meet authentication requirements."
               },
               {
                 "uuid": "dc3c79e0-f193-484e-8c1c-d4b86b214a90",
                 "control-id": "si-2.2",
-                "description": "CMS has implemented automated scanning mechanisms, using Nessus vulnerability scanner  that checks for compliance at least once every seventy-two (72) hours to determine the state of system components. The application team identifies, reports, and corrects information system flaws as needed. Flaw remediation requirements apply to all identified components for which a patch or work-around exists for each vendor-identified CVE/CWE identified vulnerability."
+                "description": "The application team has implemented automated scanning mechanisms, using Nessus vulnerability scanner that checks for compliance at least once every seventy-two (72) hours to determine the state of system components. The application team identifies, reports, and corrects information system flaws as needed. Flaw remediation requirements apply to all identified components for which a patch or work-around exists for each vendor-identified CVE/CWE identified vulnerability."
               },
               {
                 "uuid": "4faa7112-e5e5-4f0e-a8bd-94dfad877ac5",

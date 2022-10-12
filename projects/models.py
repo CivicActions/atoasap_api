@@ -16,8 +16,8 @@ class Project(models.Model):
         HIGH = "high", _("High")
 
     class LocationChoices(models.TextChoices):
-        CMSAWS = "cms_aws", _("CMS AWS Commercial East-West")
-        GOVCLOUD = "govcloud", _("CMS AWS GovCloud")
+        AWS = "aws", _("AWS Commercial East-West")
+        GOVCLOUD = "govcloud", _("AWS GovCloud")
         AZURE = "azure", _("Microsoft Azure")
         OTHER = "other", _("Other")
 
@@ -122,11 +122,7 @@ class ProjectControl(models.Model):
     )
     remarks = models.TextField(blank=True)
 
-    disabled_narratives = ArrayField(
-        models.IntegerField(),
-        blank=True,
-        default=list
-    )
+    disabled_narratives = ArrayField(models.IntegerField(), blank=True, default=list)
 
     def __str__(self):
         return self.control.control_id

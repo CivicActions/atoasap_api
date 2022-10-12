@@ -1,12 +1,11 @@
 import json
-
 from typing import Any, List, Optional, Tuple
 
 from django.db.models import TextChoices
 from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
 
-from blueprintapi.oscal.component import ImplementedRequirement, Model
+from blueprintapi.oscal.component import ComponentModel, ImplementedRequirement
 from catalogs.catalogio import CatalogTools
 from catalogs.models import Catalog
 from components.models import Component
@@ -31,7 +30,10 @@ class ComponentListSerializer(serializers.ModelSerializer):
             "component_file",
             "controls_count",
         )
-        read_only_fields = ("supported_catalog_versions", "id", )
+        read_only_fields = (
+            "supported_catalog_versions",
+            "id",
+        )
 
 
 class ComponentSerializer(serializers.ModelSerializer):
@@ -53,7 +55,12 @@ class ComponentSerializer(serializers.ModelSerializer):
             "component_data",
             "project_data",
         )
-        read_only_fields = ("id", "catalog_data", "component_data", "project_data", )
+        read_only_fields = (
+            "id",
+            "catalog_data",
+            "component_data",
+            "project_data",
+        )
 
     def get_catalog_data(self, obj):
         data = collect_catalog_data(obj.controls, obj.supported_catalog_versions)
@@ -82,7 +89,9 @@ class ComponentSerializer(serializers.ModelSerializer):
         )
         for project_id in remove:
             project_data = Project.objects.get(pk=project_id)
-            form_values["remove"].append({"value": project_id, "label": project_data.title})
+            form_values["remove"].append(
+                {"value": project_id, "label": project_data.title}
+            )
 
         add = Project.objects.filter(creator_id=user).exclude(pk__in=remove)
         for project in add:
@@ -91,9 +100,11 @@ class ComponentSerializer(serializers.ModelSerializer):
         return form_values
 
 
-def collect_catalog_data(controls: list, catalog_versions: List[Catalog.Version]) -> dict:
+def collect_catalog_data(
+    controls: list, catalog_versions: List[Catalog.Version]
+) -> dict:
     """Return the Catalog data for the given Controls."""
-    data = {}
+    data: dict = {}
     catalogs = Catalog.objects.filter(version__in=catalog_versions)
 
     for catalog in catalogs:
@@ -102,14 +113,17 @@ def collect_catalog_data(controls: list, catalog_versions: List[Catalog.Version]
 
         cat_data = CatalogTools(catalog.file_name.path)
         data[version][catalog.impact_level] = {
-            "controls": {control: cat_data.get_control_data_simplified(control) for control in controls}
+            "controls": {
+                control: cat_data.get_control_data_simplified(control)
+                for control in controls
+            }
         }
 
     return data
 
 
 def collect_component_data(component: dict) -> dict:
-    component_model = Model(**component)
+    component_model = ComponentModel(**component)
     component_def = component_model.component_definition.components[0]
 
     return {
@@ -122,19 +136,19 @@ def collect_component_data(component: dict) -> dict:
                     control.control_id: {
                         "narrative": control.description,
                         "responsibility": control.responsibility,
-                        "provider": control.provider
+                        "provider": control.provider,
                     }
                     for control in item.implemented_requirements
-                }
+                },
             }
             for item in component_def.control_implementations
-        }
+        },
     }
 
 
-def get_control_responsibility(control: dict, name: str) -> Optional[Any]:
+def get_control_responsibility(control: dict, name: str) -> Optional[Any]:  # type: ignore
     if "props" in control and isinstance(control.get("props"), list):
-        for prop in control.get("props"):
+        for prop in control.get("props"):  # type: ignore
             if prop.get("name") == name:
                 return prop.get("value")
 
@@ -175,26 +189,35 @@ class ComponentControlSerializer(serializers.ModelSerializer):
             "action",
             "catalog_version",
         )
-        read_only_fields = ("component_json", "pk", )
+        read_only_fields = (
+            "component_json",
+            "pk",
+        )
 
     def validate(self, attrs: dict) -> dict:
         def _check_required_field(field_: str):
             if not attrs.get(field_):
-                raise serializers.ValidationError(f"Required field, {field_} was not provided or is empty.")
+                raise serializers.ValidationError(
+                    f"Required field, {field_} was not provided or is empty."
+                )
 
         # Controls, action, catalog_version always required.
         for field in ("action", "controls", "catalog_version"):
             _check_required_field(field)
 
         if attrs.get("action") == self.Action.ADD and not attrs.get("description"):
-            raise serializers.ValidationError("'description' is required for 'add' action.")
+            raise serializers.ValidationError(
+                "'description' is required for 'add' action."
+            )
 
         return attrs
 
     # noinspection PyMethodMayBeStatic
     def validate_controls(self, value: list) -> list:
         if len(value) > 1:
-            raise serializers.ValidationError("Updating multiple controls is not supported.")
+            raise serializers.ValidationError(
+                "Updating multiple controls is not supported."
+            )
 
         return value
 
@@ -203,7 +226,9 @@ class ComponentControlSerializer(serializers.ModelSerializer):
         try:
             catalog_version = Catalog.Version(value)
         except ValueError as exc:
-            raise serializers.ValidationError(f"Invalid catalog version: '{value}'") from exc
+            raise serializers.ValidationError(
+                f"Invalid catalog version: '{value}'"
+            ) from exc
 
         return catalog_version
 
@@ -213,17 +238,25 @@ class ComponentControlSerializer(serializers.ModelSerializer):
         catalog_version = validated_data["catalog_version"]
 
         try:
-            location, component_model = self._find_update_location(instance, catalog_version)
+            location, component_model = self._find_update_location(  # type: ignore
+                instance, catalog_version
+            )
         except (TypeError, ValueError) as exc:
             raise serializers.ValidationError(
                 f"Could not find a matching section for the provided catalog version, {catalog_version}."
             ) from exc
 
         if action == self.Action.REMOVE:
-            self._remove_implemented_requirement(instance, control, location, component_model)
+            self._remove_implemented_requirement(
+                instance, control, location, component_model  # type: ignore
+            )
         else:
             self._add_implemented_requirement(
-                instance, control, validated_data["description"], location, component_model
+                instance,
+                control,
+                validated_data["description"],
+                location,
+                component_model,
             )
 
         instance.save()
@@ -232,45 +265,61 @@ class ComponentControlSerializer(serializers.ModelSerializer):
 
     @staticmethod
     def _find_update_location(
-            instance: Component, catalog_version: str
-    ) -> Optional[Tuple[List[ImplementedRequirement], Model]]:
+        instance: Component, catalog_version: str
+    ) -> Optional[Tuple[List[ImplementedRequirement], ComponentModel]]:
         """Find the sections of a Component's json that needs to be updated."""
-        component_data = Model(**instance.component_json)
-
+        component_data = ComponentModel(**instance.component_json)
+        requirements = []
         for component in component_data.component_definition.components:
             for implementation in component.control_implementations:
                 if catalog_version == implementation.description:
-                    return implementation.implemented_requirements, component_data
+                    requirements = implementation.implemented_requirements
+
+        return requirements, component_data
 
     @staticmethod
     def _add_implemented_requirement(
-            instance: Component,
-            control: str,
-            description: str,
-            location: List[ImplementedRequirement],
-            component_model: Model
+        instance: Component,
+        control: str,
+        description: str,
+        location: List[ImplementedRequirement],
+        component_model: ComponentModel,
     ):
-        requirement = next(filter(lambda req: req.control_id == control, location), None)
+        requirement = next(
+            filter(lambda req: req.control_id == control, location), None
+        )
 
         if requirement is None:
-            location.append(ImplementedRequirement(control_id=control, description=description))
+            location.append(
+                ImplementedRequirement(control_id=control, description=description)
+            )
         else:
             requirement.description = description
 
-        instance.component_json = json.loads(component_model.json(by_alias=True, exclude_none=True))
+        instance.component_json = json.loads(
+            component_model.json(by_alias=True, exclude_none=True)
+        )
 
     @staticmethod
     def _remove_implemented_requirement(
-            instance: Component,
-            control: str,
-            location: List[ImplementedRequirement],
-            component_model: Model
+        instance: Component,
+        control: str,
+        location: List[ImplementedRequirement],
+        component_model: ComponentModel,
     ):
         try:
-            location.remove(next(filter(lambda requirement: requirement.control_id == control, location)))
+            location.remove(
+                next(
+                    filter(
+                        lambda requirement: requirement.control_id == control, location
+                    )
+                )
+            )
         except StopIteration as exc:
             raise serializers.ValidationError(
                 f"Could not remove control, {control} from {instance.title}. Matching control not found."
             ) from exc
 
-        instance.component_json = json.loads(component_model.json(by_alias=True, exclude_none=True))
+        instance.component_json = json.loads(
+            component_model.json(by_alias=True, exclude_none=True)
+        )

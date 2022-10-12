@@ -13,12 +13,12 @@
         "uuid": "cc965c52-d20c-42b6-a7f0-af07bc4061ce",
         "type": "software",
         "title": "Splunk",
-        "description": "Splunk",
+        "description": "Splunk; the data platform leader for security and observability.",
         "control-implementations": [
           {
             "uuid": "bbb0bd41-08fd-4fa8-9f51-75ff7c366aeb",
-            "source": "https://raw.githubusercontent.com/CMSgov/ars-machine-readable/main/3.1/oscal/json/CMS_ARS_3_1_catalog.json",
-            "description": "CMS_ARS_3_1",
+            "source": "https://raw.githubusercontent.com/usnistgov/oscal-content/main/nist.gov/SP800-53/rev5/json/NIST_800_53_rev5_catalog.json",
+            "description": "NIST_SP80053r5",
             "implemented-requirements": [
               {
                 "uuid": "8b439e8c-56db-4a5a-b06e-b6769fdf9f30",

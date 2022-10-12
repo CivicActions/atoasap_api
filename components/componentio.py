@@ -1,3 +1,4 @@
+# mypy: ignore-errors
 import json
 from typing import Any, List, Optional, Union
 
@@ -14,32 +15,35 @@ class ComponentTools:
             comp = json.loads(component)
             self.component = comp.get("component-definition")
         else:
-            raise TypeError(f"component can be dict or str. Received: {type(component)}.")
+            raise TypeError(
+                f"component can be dict or str. Received: {type(component)}."
+            )
 
     def get_components(self) -> List[dict]:
-        result = []
+        result: List = [dict]
         if self.component is None:
             return result
 
         return self.component.get("components", result)
 
-    def get_component_value(self, key: str) -> Optional[Any]:
+    def get_component_value(self, key: str) -> Optional[str]:
         component = self.get_components()
+        value = None
         if component:
-            return component[0].get(key)
+            value = component[0].get(key)
+        return value
 
-    def get_implemenations(self) -> List[dict]:
+    def get_implementations(self) -> List[dict]:
         impls = []
         components = self.get_components()
         for component in components:
             if "control-implementations" in component:
                 impls = component.get("control-implementations")
-
         return impls
 
     def get_controls(self) -> List[dict]:
         controls = []
-        implementations = self.get_implemenations()
+        implementations = self.get_implementations()
         if implementations:
             for control_implementation in implementations:
                 controls = control_implementation.get("implemented-requirements")
@@ -53,7 +57,9 @@ class ComponentTools:
 
     def get_control_by_id(self, control_id) -> List[dict]:
         controls = self.get_controls()
-        control = [control for control in controls if control.get("control-id") == control_id]
+        control = [
+            control for control in controls if control.get("control-id") == control_id
+        ]
 
         return control
 
@@ -65,8 +71,12 @@ class ComponentTools:
                     return prop.get("value")
 
 
-def create_empty_component_json(title: str, catalog_version: str, impact_level: str) -> str:
-    source = Catalog.objects.get(version=catalog_version, impact_level=impact_level).source
+def create_empty_component_json(
+    title: str, catalog_version: str, impact_level: str
+) -> str:
+    source = Catalog.objects.get(
+        version=catalog_version, impact_level=impact_level
+    ).source
 
     control_implementation = oscal_component.ControlImplementation(
         description=catalog_version,
@@ -86,8 +96,6 @@ def create_empty_component_json(title: str, catalog_version: str, impact_level: 
     )
     component_definition.add_component(component)
 
-    return (
-        oscal_component
-        .Model(component_definition=component_definition)
-        .json(by_alias=True, exclude_none=True, indent=4)
-    )
+    return oscal_component.ComponentModel(
+        component_definition=component_definition
+    ).json(by_alias=True, exclude_none=True, indent=4)
