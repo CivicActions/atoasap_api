@@ -17,8 +17,8 @@
         "control-implementations": [
           {
             "uuid": "0b18e15f-f3db-4daf-a306-dccf912afe9d",
-            "source": "https://raw.githubusercontent.com/CMSgov/ars-machine-readable/main/3.1/oscal/json/CMS_ARS_3_1_catalog.json",
-            "description": "CMS_ARS_3_1",
+            "source": "https://raw.githubusercontent.com/usnistgov/oscal-content/main/nist.gov/SP800-53/rev5/json/NIST_800_53_rev5_catalog.json",
+            "description": "NIST_SP80053r5",
             "implemented-requirements": [
               {
                 "uuid": "4cb5534e-0a7b-4786-86f4-48b83f2c89b6",

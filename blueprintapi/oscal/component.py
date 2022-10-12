@@ -1,9 +1,9 @@
 # Define OSCAL Component using Component Definition Model v1.0.0
 # https://pages.nist.gov/OSCAL/reference/1.0.0/component-definition/json-outline/
+# mypy: ignore-errors
 import json
-
-from pathlib import Path
 from enum import Enum
+from pathlib import Path
 from typing import List, Optional, Union
 from uuid import UUID, uuid4
 
@@ -17,9 +17,9 @@ from blueprintapi.oscal.oscal import (
     Metadata,
     NCName,
     OSCALElement,
+    Parameter,
     Property,
     ResponsibleRole,
-    Parameter,
 )
 from catalogs.models import Catalog
 
@@ -173,9 +173,16 @@ class Component(OSCALElement):
 
     def get_control_implementation(self, catalog_version: str) -> ControlImplementation:
         try:
-            return next(filter(lambda imp: imp.description == catalog_version, self.control_implementations))
+            return next(
+                filter(
+                    lambda imp: imp.description == catalog_version,
+                    self.control_implementations,
+                )
+            )
         except StopIteration as exc:
-            raise KeyError(f"Provided catalog version is not in control implementations: '{catalog_version}'.") from exc
+            raise KeyError(
+                f"Provided catalog version is not in control implementations: '{catalog_version}'."
+            ) from exc
 
     @property
     def control_ids(self) -> List[str]:
@@ -197,13 +204,22 @@ class Component(OSCALElement):
 
         return self.get_control_implementation(catalog_version).implemented_requirements
 
-    def get_control(self, control_id: str, catalog_version: str) -> ImplementedRequirement:
+    def get_control(
+        self, control_id: str, catalog_version: str
+    ) -> ImplementedRequirement:
         implementation = self.get_control_implementation(catalog_version)
 
         try:
-            return next(filter(lambda req: req.control_id == control_id, implementation.implemented_requirements))
+            return next(
+                filter(
+                    lambda req: req.control_id == control_id,
+                    implementation.implemented_requirements,
+                )
+            )
         except StopIteration as exc:
-            raise KeyError(f"{control_id} is not implemented in this component.") from exc
+            raise KeyError(
+                f"{control_id} is not implemented in this component."
+            ) from exc
 
     @property
     def catalog_versions(self) -> List[Catalog.Version]:
@@ -282,7 +298,7 @@ class ComponentDefinition(OSCALElement):
         exclude_if_false = ["components", "capabilities"]
 
 
-class Model(OSCALElement):
+class ComponentModel(OSCALElement):
     component_definition: ComponentDefinition
 
     class Config:
@@ -293,3 +309,7 @@ class Model(OSCALElement):
     def from_json(cls, json_file: Union[str, Path]):
         with open(json_file) as data:
             return cls(**json.load(data))
+
+    @classmethod
+    def list_components(cls):
+        return cls.component_definition.components

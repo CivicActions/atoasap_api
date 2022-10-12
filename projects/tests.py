@@ -32,32 +32,32 @@ TEST_COMPONENT_JSON_BLOB = {
                     {
                         "uuid": "f94a7f03-6ac5-4386-98eb-fa0392f26a1c",
                         "source": "https://raw.githubusercontent.com/NIST/catalog.json",
-                        "description": Catalog.Version.CMS_ARS_3_1,
+                        "description": Catalog.Version.NIST_SP80053r5,
                         "implemented-requirements": [
                             {
                                 "uuid": "6698d762-5cdc-452e-9f9e-3074df5292c6",
                                 "control-id": "ac-2",
-                                "description": "This component statisfies a.",
+                                "description": "This component satisfies a.",
                             },
                             {
                                 "uuid": "73dd3c2e-54eb-43c6-a488-dfb7c79d9413",
                                 "control-id": "at-1",
-                                "description": "This component statisfies b.",
+                                "description": "This component satisfies b.",
                             },
                             {
                                 "uuid": "73dd3c2e-54eb-43c6-a488-dfb7c79d9413",
                                 "control-id": "at-2",
-                                "description": "This component statisfies c.",
+                                "description": "This component satisfies c.",
                             },
                             {
                                 "uuid": "73dd3c2e-54eb-43c6-a488-dfb7c79d9413",
                                 "control-id": "at-3",
-                                "description": "This component statisfies d.",
+                                "description": "This component satisfies d.",
                             },
                             {
                                 "uuid": "73dd3c2e-54eb-43c6-a488-dfb7c79d9413",
                                 "control-id": "pe-3",
-                                "description": "This component statisfies e.",
+                                "description": "This component satisfies e.",
                             },
                         ],
                     }
@@ -78,25 +78,16 @@ class ProjectModelTest(TestCase):
             "load_catalog",
             name="NIST Test Catalog",
             catalog_file="blueprintapi/testdata/NIST_SP-800-53_rev5_test.json",
-            catalog_version=Catalog.Version.CMS_ARS_3_1,
+            catalog_version=Catalog.Version.NIST_SP80053r5,
             impact_level=Catalog.ImpactLevel.LOW,
         )
 
         test_catalog = Catalog.objects.get(name="NIST Test Catalog")
 
-        cls.test_component = Component.objects.create(
-            title="OCISO",
-            description="OCISO Inheritable Controls",
-            supported_catalog_versions=[Catalog.Version.CMS_ARS_3_1],
-            search_terms=[],
-            type="software",
-            component_json=TEST_COMPONENT_JSON_BLOB,
-        )
-
         cls.test_project = Project.objects.create(
             title="Pretty Ordinary Project",
             acronym="POP",
-            catalog_version=Catalog.Version.CMS_ARS_3_1,
+            catalog_version=Catalog.Version.NIST_SP80053r5,
             impact_level=Project.ImpactLevel.LOW,
             location="other",
             creator=user,
@@ -105,11 +96,16 @@ class ProjectModelTest(TestCase):
 
     def test_project_permissions(self):
         self.assertTrue(
-            self.user.has_perms(("change_project", "view_project", "manage_project_users"), self.test_project)
+            self.user.has_perms(
+                ("change_project", "view_project", "manage_project_users"),
+                self.test_project,
+            )
         )
 
     def test_project_has_default_component(self):
-        private_component = self.test_project.components.get(title="Pretty Ordinary Project private")
+        private_component = self.test_project.components.get(
+            title="Pretty Ordinary Project This System"
+        )
         self.assertEqual(private_component.status, Component.Status.SYSTEM)
 
 
@@ -125,9 +121,9 @@ class ProjectListCreateViewTestCase(AuthenticatedAPITestCase):
             creator=user,
             title="MyProject",
             acronym="MP",
-            catalog_version=Catalog.Version.CMS_ARS_3_1,
+            catalog_version=Catalog.Version.NIST_SP80053r5,
             impact_level=Project.ImpactLevel.LOW,
-            location="other"
+            location="other",
         )
 
         control_status = project.to_project.first()
@@ -138,22 +134,22 @@ class ProjectListCreateViewTestCase(AuthenticatedAPITestCase):
             creator=user,
             title="MyProject2",
             acronym="MP2",
-            catalog_version=Catalog.Version.CMS_ARS_3_1,
+            catalog_version=Catalog.Version.NIST_SP80053r5,
             impact_level=Project.ImpactLevel.LOW,
-            location="other"
+            location="other",
         )
 
     def test_missing_fields_returns_400(self):
         test_cases = (
             {
                 "acronym": "NTP",
-                "catalog_version": Catalog.Version.CMS_ARS_3_1,
+                "catalog_version": Catalog.Version.NIST_SP80053r5,
                 "impact_level": "low",
                 "location": "other",
             },
             {
                 "title": "No Acronym Project",
-                "catalog_version": Catalog.Version.CMS_ARS_3_1,
+                "catalog_version": Catalog.Version.NIST_SP80053r5,
                 "impact_level": "low",
                 "location": "other",
             },
@@ -162,7 +158,9 @@ class ProjectListCreateViewTestCase(AuthenticatedAPITestCase):
         for test in test_cases:
             with self.subTest(test=test):
                 response = self.client.post(
-                    reverse("project-list"), data=json.dumps(test), content_type="application/json"
+                    reverse("project-list"),
+                    data=json.dumps(test),
+                    content_type="application/json",
                 )
                 self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
@@ -175,23 +173,29 @@ class ProjectListCreateViewTestCase(AuthenticatedAPITestCase):
             {
                 "title": "Test project",
                 "acronym": "TP",
-                "catalog_version": Catalog.Version.CMS_ARS_3_1,
+                "catalog_version": Catalog.Version.NIST_SP80053r5,
                 "impact_level": Project.ImpactLevel.LOW,
                 "location": "other",
                 "catalog": (
-                    Catalog.objects.get(version=Catalog.Version.CMS_ARS_3_1, impact_level=Catalog.ImpactLevel.LOW).id
-                )
+                    Catalog.objects.get(
+                        version=Catalog.Version.NIST_SP80053r5,
+                        impact_level=Catalog.ImpactLevel.LOW,
+                    ).id
+                ),
             },
             {
                 "title": "Other Test project",
                 "acronym": "OTP",
-                "catalog_version": Catalog.Version.CMS_ARS_5_0,
+                "catalog_version": Catalog.Version.NIST_SP80053r5,
                 "impact_level": Project.ImpactLevel.LOW,
                 "location": "other",
                 "catalog": (
-                    Catalog.objects.get(version=Catalog.Version.CMS_ARS_5_0, impact_level=Catalog.ImpactLevel.LOW).id
-                )
-            }
+                    Catalog.objects.get(
+                        version=Catalog.Version.NIST_SP80053r5,
+                        impact_level=Catalog.ImpactLevel.LOW,
+                    ).id
+                ),
+            },
         ]
 
         for test_case in test_cases:
@@ -199,7 +203,9 @@ class ProjectListCreateViewTestCase(AuthenticatedAPITestCase):
                 expected_catalog = test_case.pop("catalog")
 
                 response = self.client.post(
-                    reverse("project-list"), data=json.dumps(test_case), content_type="application/json"
+                    reverse("project-list"),
+                    data=json.dumps(test_case),
+                    content_type="application/json",
                 )
                 self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
@@ -225,7 +231,7 @@ class ProjectListCreateViewTestCase(AuthenticatedAPITestCase):
             with self.subTest(project=project["title"]):
                 self.assertEqual(project["completed_controls"], expected)
                 # Both projects have the same number of controls based on the catalog
-                self.assertEqual(project["total_controls"], 183)
+                self.assertEqual(project["total_controls"], 149)
 
 
 class ProjectComponentsTest(AuthenticatedAPITestCase):
@@ -237,7 +243,7 @@ class ProjectComponentsTest(AuthenticatedAPITestCase):
             "load_catalog",
             name="NIST Test Catalog",
             catalog_file="blueprintapi/testdata/NIST_SP-800-53_rev5_test.json",
-            catalog_version=Catalog.Version.CMS_ARS_3_1,
+            catalog_version=Catalog.Version.NIST_SP80053r5,
             impact_level=Catalog.ImpactLevel.LOW,
         )
 
@@ -246,7 +252,7 @@ class ProjectComponentsTest(AuthenticatedAPITestCase):
         test_component = Component.objects.create(
             title="Cool Component",
             description="Probably the coolest component you ever did see. It's magical.",
-            supported_catalog_versions=[Catalog.Version.CMS_ARS_3_1],
+            supported_catalog_versions=[Catalog.Version.NIST_SP80053r5],
             search_terms=["cool", "magic", "software"],
             type="software",
             component_json=TEST_COMPONENT_JSON_BLOB,
@@ -255,17 +261,8 @@ class ProjectComponentsTest(AuthenticatedAPITestCase):
         test_component_2 = Component.objects.create(
             title="Cool Components",
             description="Probably the coolest component you ever did see. It's magical.",
-            supported_catalog_versions=[Catalog.Version.CMS_ARS_3_1],
+            supported_catalog_versions=[Catalog.Version.NIST_SP80053r5],
             search_terms=["cool", "magic", "software"],
-            type="software",
-            component_json=TEST_COMPONENT_JSON_BLOB,
-        )
-
-        Component.objects.create(
-            title="OCISO",
-            description="OCISO Inheritable Controls",
-            supported_catalog_versions=[Catalog.Version.CMS_ARS_3_1],
-            search_terms=[],
             type="software",
             component_json=TEST_COMPONENT_JSON_BLOB,
         )
@@ -273,7 +270,7 @@ class ProjectComponentsTest(AuthenticatedAPITestCase):
         test_project = Project.objects.create(
             title="Pretty Ordinary Project",
             acronym="POP",
-            catalog_version=Catalog.Version.CMS_ARS_3_1,
+            catalog_version=Catalog.Version.NIST_SP80053r5,
             impact_level=Project.ImpactLevel.LOW,
             location="other",
             creator=test_user,
@@ -314,38 +311,40 @@ class ProjectAddComponentViewTest(AuthenticatedAPITestCase):
         call_command("load_catalog", load_standard_catalogs=True)
         call_command("load_components")
 
-        cls.test_project = Project.objects.create(
-            title="Pretty Ordinary Project",
+        cls.test_project_rev5 = Project.objects.create(
+            title="Ordinary Rev 5 Project",
             acronym="POP",
-            catalog_version=Catalog.Version.CMS_ARS_3_1,
+            catalog_version=Catalog.Version.NIST_SP80053r5,
             impact_level="low",
             location="other",
             creator=test_user,
         )
 
-        cls.test_project_5_0 = Project.objects.create(
-            title="Pretty Ordinary Project 2",
+        cls.test_project_rev4 = Project.objects.create(
+            title="Ordinary Rev 4 Project ",
             acronym="POP2",
-            catalog_version=Catalog.Version.CMS_ARS_5_0,
+            catalog_version=Catalog.Version.NIST_SP80053r4,
             impact_level="low",
             location="other",
             creator=test_user,
         )
 
-        cls.test_component_3_1 = (
-            Component.objects.filter(supported_catalog_versions=[Catalog.Version.CMS_ARS_3_1]).first()
-        )
+        cls.test_component_rev5 = Component.objects.filter(
+            supported_catalog_versions=[Catalog.Version.NIST_SP80053r5]
+        ).first()
 
-        cls.test_component_5_0 = Component.objects.create(
+        cls.test_component_rev4 = Component.objects.create(
             title="New Cool Component",
             description="Probably the coolest component you ever did see. It's magical.",
-            supported_catalog_versions=[Catalog.Version.CMS_ARS_5_0],
+            supported_catalog_versions=[Catalog.Version.NIST_SP80053r4],
             search_terms=["cool", "magic", "software"],
             type="software",
             component_json=TEST_COMPONENT_JSON_BLOB,
         )
 
-        cls.django_test_component = Component.objects.get(title="Django")  # Has 3.1 and 5.0 implementations
+        cls.django_test_component = Component.objects.get(
+            title="Django"
+        )  # Has Rev 4 and Rev 5 implementations
 
     def test_invalid_project(self):
         resp = self.client.post(
@@ -362,7 +361,7 @@ class ProjectAddComponentViewTest(AuthenticatedAPITestCase):
 
         resp = self.client.post(
             "/api/projects/add-component/",
-            {"creator": 0, "component_id": 1, "project_id": self.test_project.id},
+            {"creator": 0, "component_id": 1, "project_id": self.test_project_rev5.id},
         )
         self.assertEqual(resp.status_code, 404)
 
@@ -371,7 +370,7 @@ class ProjectAddComponentViewTest(AuthenticatedAPITestCase):
             "/api/projects/add-component/",
             {
                 "component_id": 0,
-                "project_id": self.test_project.id,
+                "project_id": self.test_project_rev5.id,
             },
         )
         self.assertEqual(resp.status_code, 404)
@@ -380,8 +379,8 @@ class ProjectAddComponentViewTest(AuthenticatedAPITestCase):
         resp = self.client.post(
             "/api/projects/add-component/",
             {
-                "component_id": self.test_component_5_0.id,  # Defined with 5.0 support only
-                "project_id": self.test_project.id,  # Defined on 3.1 catalog
+                "component_id": self.test_component_rev4.id,  # Defined with Rev 4 support only
+                "project_id": self.test_project_rev5.id,  # Defined on Rev 5 catalog
             },
         )
         self.assertEqual(resp.status_code, 400)
@@ -390,21 +389,21 @@ class ProjectAddComponentViewTest(AuthenticatedAPITestCase):
         resp = self.client.post(
             "/api/projects/add-component/",
             {
-                "component_id": self.test_component_3_1.id,
-                "project_id": self.test_project.id,
+                "component_id": self.test_component_rev5.id,
+                "project_id": self.test_project_rev5.id,
             },
         )
         self.assertEqual(resp.status_code, 200)
 
     def test_add_multi_implementation_component(self):
-        for project in (self.test_project.id, self.test_project_5_0.id):
+        for project in (self.test_project_rev5.id, self.test_project_rev5.id):
             with self.subTest(project=project):
                 response = self.client.post(
                     "/api/projects/add-component/",
                     {
                         "component_id": self.django_test_component.id,
-                        "project_id": project
-                    }
+                        "project_id": project,
+                    },
                 )
                 self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -418,7 +417,7 @@ class ProjectControlPage(AuthenticatedAPITestCase):
             "load_catalog",
             name="NIST Test Catalog",
             catalog_file="blueprintapi/testdata/NIST_SP-800-53_rev5_test.json",
-            catalog_version=Catalog.Version.CMS_ARS_3_1,
+            catalog_version=Catalog.Version.NIST_SP80053r5,
             impact_level=Catalog.ImpactLevel.LOW,
         )
 
@@ -427,7 +426,7 @@ class ProjectControlPage(AuthenticatedAPITestCase):
         test_component = Component.objects.create(
             title="Cool Component",
             description="Probably the coolest component you ever did see. It's magical.",
-            supported_catalog_versions=[Catalog.Version.CMS_ARS_3_1],
+            supported_catalog_versions=[Catalog.Version.NIST_SP80053r5],
             search_terms=["cool", "magic", "software"],
             type="software",
             component_json=TEST_COMPONENT_JSON_BLOB,
@@ -436,7 +435,7 @@ class ProjectControlPage(AuthenticatedAPITestCase):
         test_component_2 = Component.objects.create(
             title="Cool Components",
             description="Probably the coolest component you ever did see. It's magical.",
-            supported_catalog_versions=[Catalog.Version.CMS_ARS_3_1],
+            supported_catalog_versions=[Catalog.Version.NIST_SP80053r5],
             search_terms=["cool", "magic", "software"],
             type="software",
             component_json=TEST_COMPONENT_JSON_BLOB,
@@ -445,7 +444,7 @@ class ProjectControlPage(AuthenticatedAPITestCase):
         test_project = Project.objects.create(
             title="Pretty Ordinary Project",
             acronym="POP",
-            catalog_version=Catalog.Version.CMS_ARS_3_1,
+            catalog_version=Catalog.Version.NIST_SP80053r5,
             impact_level=Project.ImpactLevel.LOW,
             location="other",
             creator=test_user,
@@ -489,70 +488,6 @@ class ProjectControlPage(AuthenticatedAPITestCase):
         self.assertIn("private", resp.data["component_data"]["components"])
 
 
-class ProjectPostSaveAddComponentTest(TestCase):
-    @classmethod
-    def setUpTestData(cls):
-        test_user = User.objects.create()
-
-        call_command(
-            "load_catalog",
-            name="NIST Test Catalog",
-            catalog_file="blueprintapi/testdata/NIST_SP-800-53_rev5_test.json",
-            catalog_version=Catalog.Version.CMS_ARS_3_1,
-            impact_level=Catalog.ImpactLevel.LOW,
-        )
-
-        test_catalog = Catalog.objects.get(name="NIST Test Catalog")
-
-        cls.test_component = Component.objects.create(
-            title="ociso",
-            description="Probably the coolest component you ever did see. It's magical.",
-            supported_catalog_versions=[Catalog.Version.CMS_ARS_3_1],
-            search_terms=["cool", "magic", "software"],
-            type="software",
-            component_json=TEST_COMPONENT_JSON_BLOB,
-        )
-        cls.test_component_2 = Component.objects.create(
-            title="aws",
-            description="Probably the coolest component you ever did see. It's magical.",
-            supported_catalog_versions=[Catalog.Version.CMS_ARS_3_1],
-            search_terms=["cool", "magic", "software"],
-            type="software",
-            component_json=TEST_COMPONENT_JSON_BLOB,
-        )
-
-        cls.test_user = test_user
-        cls.test_catalog = test_catalog
-
-    def test_post_save_component_added_ocisco(self):
-        project = Project.objects.create(
-            title="Basic Project",
-            acronym="BP",
-            catalog_version=Catalog.Version.CMS_ARS_3_1,
-            impact_level="low",
-            location="other",
-            creator=self.test_user,
-            catalog=self.test_catalog,
-        )
-
-        self.assertTrue(project.components.filter(title="ociso").exists())
-
-    def test_post_save_component_added_both(self):
-        project = Project.objects.create(
-            title="Basic Project",
-            acronym="BP",
-            catalog_version=Catalog.Version.CMS_ARS_3_1,
-            impact_level="low",
-            location="cms_aws",
-            creator=self.test_user,
-            catalog=self.test_catalog,
-        )
-
-        for title in ("ociso", "aws"):
-            with self.subTest(default_component=title):
-                self.assertTrue(project.components.filter(title=title).exists())
-
-
 class ProjectComponentSearchViewTest(AuthenticatedAPITestCase):
     @classmethod
     def setUpTestData(cls):
@@ -562,7 +497,7 @@ class ProjectComponentSearchViewTest(AuthenticatedAPITestCase):
             "load_catalog",
             name="NIST Test Catalog",
             catalog_file="blueprintapi/testdata/NIST_SP-800-53_rev5_test.json",
-            catalog_version=Catalog.Version.CMS_ARS_3_1,
+            catalog_version=Catalog.Version.NIST_SP80053r5,
             impact_level=Catalog.ImpactLevel.LOW,
         )
 
@@ -571,7 +506,7 @@ class ProjectComponentSearchViewTest(AuthenticatedAPITestCase):
         test_component = Component.objects.create(
             title="Cool Component",
             description="Probably the coolest component you ever did see. It's magical.",
-            supported_catalog_versions=[Catalog.Version.CMS_ARS_3_1],
+            supported_catalog_versions=[Catalog.Version.NIST_SP80053r5],
             search_terms=["cool", "magic", "software"],
             type="software",
             component_json=TEST_COMPONENT_JSON_BLOB,
@@ -579,23 +514,15 @@ class ProjectComponentSearchViewTest(AuthenticatedAPITestCase):
         test_component_2 = Component.objects.create(
             title="New Cool Component",
             description="Probably the coolest component you ever did see. It's magical.",
-            supported_catalog_versions=[Catalog.Version.CMS_ARS_3_1],
+            supported_catalog_versions=[Catalog.Version.NIST_SP80053r5],
             search_terms=["cool", "magic", "software"],
             type="policy",
-            component_json=TEST_COMPONENT_JSON_BLOB,
-        )
-        test_component_3 = Component.objects.create(
-            title="OCISO",
-            description="OCISO Inheritable Controls",
-            supported_catalog_versions=[Catalog.Version.CMS_ARS_3_1],
-            search_terms=[],
-            type="software",
             component_json=TEST_COMPONENT_JSON_BLOB,
         )
         test_project = Project.objects.create(
             title="Pretty Ordinary Project",
             acronym="POP",
-            catalog_version=Catalog.Version.CMS_ARS_3_1,
+            catalog_version=Catalog.Version.NIST_SP80053r5,
             impact_level=Project.ImpactLevel.LOW,
             location="other",
             creator=test_user,
@@ -605,7 +532,6 @@ class ProjectComponentSearchViewTest(AuthenticatedAPITestCase):
             [
                 test_component,
                 test_component_2,
-                test_component_3,
             ]
         )
 
@@ -616,20 +542,9 @@ class ProjectComponentSearchViewTest(AuthenticatedAPITestCase):
             "/api/projects/" + str(self.test_project.id) + "/search/", format="json"
         )
         self.assertEqual(resp.status_code, 200)
-        self.assertEqual(json.loads(resp.content).get("total_item_count"), 3)
+        self.assertEqual(json.loads(resp.content).get("total_item_count"), 2)
         self.assertEqual(json.loads(resp.content).get("type_list")[0][0], "policy")
         self.assertEqual(json.loads(resp.content).get("type_list")[1][0], "software")
-
-    def test_search_term_ociso(self):
-        resp = self.client.get(
-            "/api/projects/" + str(self.test_project.id) + "/search/?search=OCISO",
-            format="json",
-        )
-        self.assertEqual(resp.status_code, 200)
-        self.assertEqual(
-            json.loads(resp.content).get("components")[0].get("title"), "OCISO"
-        )
-        self.assertEqual(json.loads(resp.content).get("total_item_count"), 1)
 
     def test_search_filter_type_software(self):
         resp = self.client.get(
@@ -640,7 +555,7 @@ class ProjectComponentSearchViewTest(AuthenticatedAPITestCase):
         self.assertEqual(
             json.loads(resp.content).get("components")[0].get("type"), "software"
         )
-        self.assertEqual(json.loads(resp.content).get("total_item_count"), 2)
+        self.assertEqual(json.loads(resp.content).get("total_item_count"), 1)
 
 
 class ProjectComponentNotAddedListViewTest(AuthenticatedAPITestCase):
@@ -652,24 +567,16 @@ class ProjectComponentNotAddedListViewTest(AuthenticatedAPITestCase):
             "load_catalog",
             name="NIST Test Catalog",
             catalog_file="blueprintapi/testdata/NIST_SP-800-53_rev5_test.json",
-            catalog_version=Catalog.Version.CMS_ARS_3_1,
+            catalog_version=Catalog.Version.NIST_SP80053r5,
             impact_level=Catalog.ImpactLevel.LOW,
         )
 
         test_catalog = Catalog.objects.get(name="NIST Test Catalog")
 
         Component.objects.create(
-            title="OCISO",
-            description="OCISO Inheritable Controls",
-            supported_catalog_versions=[Catalog.Version.CMS_ARS_3_1],
-            search_terms=[],
-            type="software",
-            component_json=TEST_COMPONENT_JSON_BLOB,
-        )
-        Component.objects.create(
             title="Cool Component",
             description="Probably the coolest component you ever did see. It's magical.",
-            supported_catalog_versions=[Catalog.Version.CMS_ARS_3_1],
+            supported_catalog_versions=[Catalog.Version.NIST_SP80053r5],
             search_terms=["cool", "magic", "software"],
             type="software",
             component_json=TEST_COMPONENT_JSON_BLOB,
@@ -677,7 +584,7 @@ class ProjectComponentNotAddedListViewTest(AuthenticatedAPITestCase):
         Component.objects.create(
             title="New Cool Component",
             description="Probably the coolest component you ever did see. It's magical.",
-            supported_catalog_versions=[Catalog.Version.CMS_ARS_3_1],
+            supported_catalog_versions=[Catalog.Version.NIST_SP80053r5],
             search_terms=["cool", "magic", "software"],
             type="policy",
             component_json=TEST_COMPONENT_JSON_BLOB,
@@ -685,7 +592,7 @@ class ProjectComponentNotAddedListViewTest(AuthenticatedAPITestCase):
         Component.objects.create(
             title="private component",
             description="Probably the coolest component you ever did see. It's magical.",
-            supported_catalog_versions=[Catalog.Version.CMS_ARS_3_1],
+            supported_catalog_versions=[Catalog.Version.NIST_SP80053r5],
             search_terms=["cool", "magic", "software"],
             type="policy",
             component_json=TEST_COMPONENT_JSON_BLOB,
@@ -694,24 +601,12 @@ class ProjectComponentNotAddedListViewTest(AuthenticatedAPITestCase):
         cls.test_project = Project.objects.create(
             title="Pretty Ordinary Project",
             acronym="POP",
-            catalog_version=Catalog.Version.CMS_ARS_3_1,
+            catalog_version=Catalog.Version.NIST_SP80053r5,
             impact_level=Project.ImpactLevel.LOW,
             location="other",
             creator=test_user,
             catalog=test_catalog,
         )
-
-    def test_ociso_component_not_returned(self):
-        resp = self.client.get(
-            "/api/projects/" + str(self.test_project.id) + "/components-not-added/",
-            format="json",
-        )
-        self.assertEqual(resp.status_code, 200)
-
-        content = resp.json()
-        for test in content:
-            with self.subTest():
-                self.assertNotEqual(test.get("title"), "OCISO")
 
     def test_private_component_not_returned(self):
         resp = self.client.get(
@@ -740,7 +635,7 @@ class RetrieveUpdateProjectControlViewTestCase(AuthenticatedAPITestCase):
         project = Project.objects.create(
             title="Test project",
             acronym="TP",
-            catalog_version=Catalog.Version.CMS_ARS_3_1,
+            catalog_version=Catalog.Version.NIST_SP80053r5,
             impact_level=Project.ImpactLevel.LOW,
             location="other",
             creator=user,
@@ -750,71 +645,90 @@ class RetrieveUpdateProjectControlViewTestCase(AuthenticatedAPITestCase):
 
         cls.project = project
 
-        cls.ac_1_path = reverse("project-get-control", kwargs={"project_id": project.id, "control_id": "ac-1"})
+        cls.ac_2_path = reverse(
+            "project-get-control",
+            kwargs={"project_id": project.id, "control_id": "ac-2"},
+        )
 
     def setUp(self):
         self.client.force_authenticate(user=self.user, token=self.token)
 
     def test_get_project_control(self):
-        response = self.client.get(self.ac_1_path)
+        response = self.client.get(self.ac_2_path)
         self.assertEqual(response.status_code, 200)
 
         content = response.json()
 
         # Check top-level response structure
         self.assertTrue(
-            all(item in content for item in ("status", "project", "control", "catalog_data", "component_data"))
+            all(
+                item in content
+                for item in (
+                    "status",
+                    "project",
+                    "control",
+                    "catalog_data",
+                    "component_data",
+                )
+            )
         )
 
         # Check control data
         control = content["control"]
         expected = {
-            "control_id": "ac-1",
-            "control_label": "AC-01",
-            "sort_id": "ac-01",
-            "title": "Access Control Policy and Procedures"
+            "control_id": "ac-2",
+            "control_label": "AC-2",
+            "sort_id": "ac-02",
+            "title": "Account Management",
         }
 
         with self.subTest(msg="Test next control"):
-            self.assertEqual(content["catalog_data"]["next_id"], "ac-2")
+            self.assertEqual(content["catalog_data"]["next_id"], "ac-3")
 
         for field, value in expected.items():
             with self.subTest(field=field):
                 self.assertEqual(control[field], value)
 
-        with self.subTest(msg="Test inherited components"):
-            self.assertEqual(len(content["component_data"]["components"]["inherited"]), 2)
-            self.assertTrue(
-                all(item["enabled"] for item in content["component_data"]["components"]["inherited"].values())
-            )
-
     def test_get_project_control_project_info(self):
-        response = self.client.get(self.ac_1_path)
+        response = self.client.get(self.ac_2_path)
         self.assertEqual(response.status_code, 200)
 
         content = response.json()
         project = content["project"]
-        self.assertTrue(all(item in project for item in ("id", "title", "acronym", "private_component", )))
+        self.assertTrue(
+            all(
+                item in project
+                for item in (
+                    "id",
+                    "title",
+                    "acronym",
+                    "private_component",
+                )
+            )
+        )
         self.assertIsNotNone(project["private_component"])
         self.assertEqual(project["title"], "Test project")
         self.assertEqual(project["acronym"], "TP")
 
     def test_missing_control_returns_404(self):
         response = self.client.get(
-            reverse("project-get-control", kwargs={"project_id": self.project.id, "control_id": "not-a-control"})
+            reverse(
+                "project-get-control",
+                kwargs={"project_id": self.project.id, "control_id": "not-a-control"},
+            )
         )
 
         self.assertEqual(response.status_code, 404)
 
     def test_update_control_status(self):
-        initial_response = self.client.get(self.ac_1_path)
+        initial_response = self.client.get(self.ac_2_path)
 
         original_status = initial_response.json()["status"]
 
         response = self.client.patch(
-            self.ac_1_path,
+            self.ac_2_path,
             data=json.dumps({"status": ProjectControl.Status.INCOMPLETE}),
-            content_type="application/json"
+            content_type="application/json",
         )
 
         self.assertEqual(response.status_code, 200)
@@ -826,27 +740,35 @@ class RetrieveUpdateProjectControlViewTestCase(AuthenticatedAPITestCase):
     def test_enable_disable_narrative(self):
         title = "Amazon Web Services"
         test_component = Component.objects.get(title=title).id
-        patch_kwargs = {"path": self.ac_1_path, "content_type": "application/json"}
+        patch_kwargs = {"path": self.ac_2_path, "content_type": "application/json"}
 
         # Test narrative is disabled
-        disable_response = self.client.patch(data=json.dumps({"disable_narratives": [test_component]}), **patch_kwargs)
+        disable_response = self.client.patch(
+            data=json.dumps({"disable_narratives": [test_component]}), **patch_kwargs
+        )
         self.assertEqual(disable_response.status_code, status.HTTP_200_OK)
 
-        narrative = disable_response.json()["component_data"]["components"]["inherited"].get(title)
+        narrative = disable_response.json()["component_data"]["components"][
+            "inherited"
+        ].get(title)
         self.assertIs(narrative["enabled"], False)
 
         # Test same narrative is re-enabled
-        enable_response = self.client.patch(data=json.dumps({"enable_narratives": [test_component]}), **patch_kwargs)
+        enable_response = self.client.patch(
+            data=json.dumps({"enable_narratives": [test_component]}), **patch_kwargs
+        )
         self.assertEqual(enable_response.status_code, status.HTTP_200_OK)
 
-        narrative = enable_response.json()["component_data"]["components"]["inherited"].get(title)
+        narrative = enable_response.json()["component_data"]["components"][
+            "inherited"
+        ].get(title)
         self.assertIs(narrative["enabled"], True)
 
     def test_invalid_id_returns_400(self):
         response = self.client.patch(
-            self.ac_1_path,
+            self.ac_2_path,
             data=json.dumps({"disable_narratives": [12345]}),
-            content_type="application/json"
+            content_type="application/json",
         )
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)

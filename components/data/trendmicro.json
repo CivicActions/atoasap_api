@@ -13,12 +13,12 @@
         "uuid": "76c17387-9b6a-4b65-8809-47b0524ad525",
         "type": "software",
         "title": "Trend Micro Deep Security",
-        "description": "Trend Micro Deep Security",
+        "description": "Trend Micro Deep Security provides advanced server security for physical, virtual, and cloud servers",
         "control-implementations": [
           {
             "uuid": "691fa773-2336-4ce6-8ad8-39a82e157250",
-            "source": "https://raw.githubusercontent.com/CMSgov/ars-machine-readable/main/3.1/oscal/json/CMS_ARS_3_1_catalog.json",
-            "description": "CMS_ARS_3_1",
+            "source": "https://raw.githubusercontent.com/usnistgov/oscal-content/main/nist.gov/SP800-53/rev5/json/NIST_800_53_rev5_catalog.json",
+            "description": "NIST_SP80053r5",
             "implemented-requirements": [
               {
                 "uuid": "2ff82c7f-7622-436e-969c-4fc956ccb7ec",
@@ -28,7 +28,7 @@
               {
                 "uuid": "1c980af1-ebe4-486d-8084-7dc2ce127501",
                 "control-id": "cm-7.4",
-                "description": "Unauthorized software/blacklisting results are searchable by the CMS Cybersecurity Integration Center (CCIC) via the GSS.\n\nThe GSS prevents unauthorized software from being executed via TrendMicro."
+                "description": "Unauthorized software/blacklisting results are searchable by the application team.\n\nThe GSS prevents unauthorized software from being executed via TrendMicro."
               },
               {
                 "uuid": "70e98fa0-60b5-478c-8e42-7ecfb43f0387",

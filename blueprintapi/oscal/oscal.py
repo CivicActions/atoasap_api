@@ -142,9 +142,16 @@ class OSCALElement(BaseModel):
 
 
 class Property(OSCALElement):
+    class Config:
+        fields = {"prop_class": "class"}
+        allow_population_by_field_name = True
+
     name: str
     value: str
+    ns: Optional[str]
     uuid: UUID = Field(default_factory=uuid4)
+    prop_class: Optional[str]
+    remarks: Optional[MarkupMultiLine]
 
 
 class Resource(OSCALElement):
@@ -275,12 +282,12 @@ class Select(OSCALElement):
     @property
     def get_select_text(self):
         text = ""
-        if hasattr(self, "how_many"):
-            label = getattr(self, "how_many").replace("-", " ")
+        if how_many := getattr(self, "how_many", None):
+            label = how_many.replace("-", " ")
             text += f"Selection ({label}): "
-        if hasattr(self, "choice"):
+        if choice := getattr(self, "choice", None):
             ch = []
-            [ch.append(c) for c in getattr(self, "choice")]
+            [ch.append(c) for c in choice]
             text += ", ".join(ch)
         return text
 

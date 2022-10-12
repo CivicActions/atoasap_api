@@ -17,8 +17,8 @@
         "control-implementations": [
           {
             "uuid": "d4ecc2c9-76b3-4426-ab1b-b305a23eb168",
-            "source": "https://raw.githubusercontent.com/CMSgov/ars-machine-readable/main/3.1/oscal/json/CMS_ARS_3_1_catalog.json",
-            "description": "CMS_ARS_3_1",
+            "source": "https://raw.githubusercontent.com/usnistgov/oscal-content/main/nist.gov/SP800-53/rev4/json/NIST_800_53_rev4_catalog.json",
+            "description": "NIST_SP80053r4",
             "implemented-requirements": [
               {
                 "uuid": "eb7388a8-1179-4583-80b3-e03ef991b0bd",
@@ -142,8 +142,8 @@
           },
           {
             "uuid": "aa1923a4-bb92-45d1-8776-389f62751fac",
-            "source": "https://raw.githubusercontent.com/CMSgov/ars-machine-readable/main/5.0/oscal/json/CMS_ARS_5_0_catalog.json",
-            "description": "CMS_ARS_5_0",
+            "source": "https://raw.githubusercontent.com/usnistgov/oscal-content/main/nist.gov/SP800-53/rev5/json/NIST_800_53_rev5_catalog.json",
+            "description": "NIST_SP80053r5",
             "implemented-requirements": [
               {
                 "uuid": "e6ddea11-8e7d-4691-8469-75089f335f2f",

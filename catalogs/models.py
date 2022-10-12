@@ -28,8 +28,8 @@ class Catalog(models.Model):
         HIGH = "high", _("High")
 
     class Version(models.TextChoices):
-        NIST_800_53_r5 = "NIST_800_53_rev5", _("NIST 800-53 rev5")
-        NIST_800_53_r4 = "NIST_800_53_rev4", _("NIST 800-53 rev4")
+        NIST_SP80053r5 = "NIST_SP80053r5", _("NIST 800-53 r5")
+        NIST_SP80053r4 = "NIST_SP80053r4", _("NIST 800-53 r4")
 
     name = models.CharField(max_length=100, help_text="Name of Catalog", unique=True)
     file_name = models.FileField(
@@ -41,13 +41,13 @@ class Catalog(models.Model):
         max_length=500,
         null=False,
         default="https://raw.githubusercontent.com/usnistgov/oscal-content/main/nist.gov/"
-        "SP800-53/rev5/json/NIST_SP-800-53_rev5_catalog.json",
+        "SP800-53/r5/json/NIST_SP-800-53_rev5_catalog.json",
     )
     version = models.CharField(
         choices=Version.choices,
         max_length=24,
         blank=False,
-        default=Version.NIST_800_53_r5,
+        default=Version.NIST_SP80053r5,
     )
     impact_level = models.CharField(
         choices=ImpactLevel.choices,

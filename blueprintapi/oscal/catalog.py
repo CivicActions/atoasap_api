@@ -1,7 +1,8 @@
+# mypy: ignore-errors
 import json
 import logging
 from pathlib import Path
-from typing import Literal, Optional, Tuple, Union
+from typing import Literal, Optional, Union
 
 from pydantic import (  # pylint: disable=no-name-in-module
     UUID4,
@@ -24,6 +25,8 @@ class BaseControl(OSCALElement):
     item_class: Optional[str]
     title: str
     params: Optional[list[Parameter]] = []
+    props: Optional[list[Property]] = []
+    links: Optional[list[Link]] = []
 
 
 # noinspection PyUnresolvedReferences
@@ -42,7 +45,7 @@ class FilterMixin:
         prop = self._get_prop("label")
 
         if not prop:
-            return self.id  # type: ignore
+            return self.id
 
         return prop.value
 
@@ -61,9 +64,8 @@ class Control(BaseControl, FilterMixin):
         allow_population_by_field_name = True
 
     family_id: Optional[str]
-    props: Optional[list[Property]] = []
-    links: Optional[list[Link]] = []
     parts: Optional[list[Part]] = []
+    controls: Optional[list["Control"]] = []
 
     @property
     def sort_id(self) -> str:
@@ -79,7 +81,7 @@ class Control(BaseControl, FilterMixin):
         return self._get_part("statement")
 
     @property
-    def implementation(self) -> str:
+    def implementation(self) -> Optional[str]:
         part = self._get_part("implementation")
 
         if not part:
@@ -111,7 +113,11 @@ class Control(BaseControl, FilterMixin):
             depth += 1
 
             if prose := getattr(item, "prose", ""):
-                prose = f"\n{tabs}{item.label} {prose}"
+                prose = (
+                    prose
+                    if item.name == "statement"
+                    else f"\n{tabs}{item.label} {prose}"
+                )
                 parts.append(prose)
 
             if parts_ := getattr(item, "parts", []):
@@ -156,7 +162,7 @@ class Group(OSCALElement):
         cls, value: list[Control], values
     ) -> list[Control]:  # pylint: disable=no-self-argument
         for item in value:
-            if not item.family_id:
+            if not item.title:
                 item.family_id = values.get("id")
 
         return value
@@ -169,10 +175,14 @@ class CatalogModel(BaseModel):
 
     @property
     def controls(self) -> list[Control]:
-        return sorted(
-            (item for group in self.groups for item in group.controls),
-            key=lambda control: control.sort_id,
-        )
+        controls = []
+        for group in self.groups:
+            for item in getattr(group, "controls"):
+                controls.append(item)
+                if children := getattr(item, "controls", ""):
+                    for ctrl in children:
+                        controls.append(ctrl)
+        return controls
 
     def get_control(self, control_id: str) -> Optional[Control]:
         return next(
@@ -184,6 +194,10 @@ class CatalogModel(BaseModel):
             for control in group.controls:
                 if control.id == control_id:
                     return group
+                elif children := getattr(control, "controls", ""):
+                    for child in children:
+                        if child.id == control_id:
+                            return group
 
     def get_next(self, control: Control) -> str:
         try:

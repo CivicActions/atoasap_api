@@ -1,11 +1,10 @@
 import json
-
 from pathlib import Path
 
-from pydantic import ValidationError
 from django.core.management.base import BaseCommand, CommandError
+from pydantic import ValidationError
 
-from blueprintapi.oscal.component import Model as ComponentModel
+from blueprintapi.oscal.component import ComponentModel as ComponentModel
 from components.models import Component
 
 
@@ -27,7 +26,9 @@ class Command(BaseCommand):
         try:
             component = ComponentModel.from_json(json_path)
         except ValidationError as exc:
-            raise CommandError(f"Could not load, {json_path.name} due to invalid data: {exc}") from exc
+            raise CommandError(
+                f"Could not load, {json_path.name} due to invalid data: {exc}"
+            ) from exc
 
         # Assume only one item in the "components" list for now
         component_def = component.component_definition.components[0]
@@ -42,9 +43,15 @@ class Command(BaseCommand):
         )
 
         if created:
-            self.stdout.write(self.style.SUCCESS(f"Component, {component_def.title} was successfully created."))
+            self.stdout.write(
+                self.style.SUCCESS(
+                    f"Component, {component_def.title} was successfully created."
+                )
+            )
         else:
-            self.style.WARNING(f"Component, {component_def.title} already exists. Skipping creation.")
+            self.style.WARNING(
+                f"Component, {component_def.title} already exists. Skipping creation."
+            )
 
     # noinspection PyMethodMayBeStatic
     def _load_test_data(self):

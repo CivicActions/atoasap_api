@@ -63,15 +63,15 @@ class Command(BaseCommand):
         impact_level_match = re.search(
             r"(?P<impact_level>high|HIGH|moderate|MODERATE|low|LOW)", path.name
         )
-        impact_level = impact_level_match.groupdict()["impact_level"].lower()
-        name = f"{catalog}_{version}_{impact_level.upper()}"
-        source = f"{catalog}_{version}"
+        impact_level = impact_level_match.groupdict()["impact_level"].lower()  # type: ignore
+        name = f"{catalog}{version}_{impact_level.upper()}"
+        source = f"{catalog}{version}"
 
         return version, impact_level, name, source
 
     def _load_standards(self):
         """Load standard catalogs from catalogs/data"""
-        catalogs_path = Path(__file__).parents[2].joinpath("data/NIST-800-53")
+        catalogs_path = Path(__file__).parents[2].joinpath("data/NIST_SP80053")
         catalog_files = list(catalogs_path.rglob("*json"))
         catalog_defs = [
             self._parse_standard_catalog_path(path) for path in catalog_files
