@@ -3,7 +3,7 @@ from typing import Optional
 from rest_framework import serializers
 
 from blueprintapi.oscal.catalog import CatalogModel
-from blueprintapi.oscal.component import ComponentModel as ComponentModel
+from blueprintapi.oscal.component import ComponentModel
 from catalogs.serializers import ControlSerializer
 from components.models import Component
 from components.serializers import ComponentListSerializer

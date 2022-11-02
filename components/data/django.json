@@ -18,7 +18,7 @@
           {
             "uuid": "f07f57e6-e910-486b-8871-e1fb8a2a25ca",
             "source": "https://raw.githubusercontent.com/usnistgov/oscal-content/master/nist.gov/SP800-53/rev4/json/NIST_SP-800-53_rev4_catalog.json",
-            "description": "NIST SP 800-53 Revision 4",
+            "description": "NIST_SP80053r4",
             "implemented-requirements": [
               {
                 "uuid": "beddcd1f-d3e1-4a8f-9d51-43c87881f64c",
@@ -143,7 +143,7 @@
           {
             "uuid": "7b384bf9-c0f3-4d1d-9984-1ed7d4a45ffe",
             "source": "https://raw.githubusercontent.com/usnistgov/oscal-content/master/nist.gov/SP800-53/rev5/json/NIST_SP-800-53_rev5_catalog.json",
-            "description": "NIST SP 800-53 Revision 5",
+            "description": "NIST_SP80053r5",
             "implemented-requirements": [
               {
                 "uuid": "c6ceac51-35d4-432f-a62a-33f9c08a3da1",

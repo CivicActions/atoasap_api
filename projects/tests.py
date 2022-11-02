@@ -772,3 +772,52 @@ class RetrieveUpdateProjectControlViewTestCase(AuthenticatedAPITestCase):
         )
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+
+class ProjectSspDownload(AuthenticatedAPITestCase):
+    @classmethod
+    def setUpTestData(cls):
+        user = User.objects.create()
+        cls.user = user
+
+        call_command(
+            "load_catalog",
+            name="NIST Test Catalog",
+            catalog_file="blueprintapi/testdata/NIST_SP-800-53_rev5_test.json",
+            catalog_version=Catalog.Version.CMS_ARS_3_1,
+            impact_level=Catalog.ImpactLevel.LOW,
+        )
+
+        test_catalog = Catalog.objects.get(name="NIST Test Catalog")
+
+        cls.test_component = Component.objects.create(
+            title="OCISO",
+            description="OCISO Inheritable Controls",
+            supported_catalog_versions=[Catalog.Version.CMS_ARS_3_1],
+            search_terms=[],
+            type="software",
+            component_json=TEST_COMPONENT_JSON_BLOB,
+        )
+
+        cls.test_project = Project.objects.create(
+            title="Pretty Ordinary Project",
+            acronym="POP",
+            catalog_version=Catalog.Version.CMS_ARS_3_1,
+            impact_level=Project.ImpactLevel.LOW,
+            location="other",
+            creator=user,
+            catalog=test_catalog,
+        )
+
+    def test_project_ssp_download(self):
+        token = Token.objects.create(user=self.user)
+        self.client.force_authenticate(user=self.user, token=token)
+
+        response = self.client.get(
+            reverse("download-ssp", kwargs={"project_id": self.test_project.pk})
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(
+            response.get("Content-Disposition"),
+            f'attachment; filename="{self.test_project.title}-ssp.json"',
+        )
