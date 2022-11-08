@@ -784,7 +784,7 @@ class ProjectSspDownload(AuthenticatedAPITestCase):
             "load_catalog",
             name="NIST Test Catalog",
             catalog_file="blueprintapi/testdata/NIST_SP-800-53_rev5_test.json",
-            catalog_version=Catalog.Version.CMS_ARS_3_1,
+            catalog_version=Catalog.Version.NIST_SP80053r5,
             impact_level=Catalog.ImpactLevel.LOW,
         )
 
@@ -793,7 +793,7 @@ class ProjectSspDownload(AuthenticatedAPITestCase):
         cls.test_component = Component.objects.create(
             title="OCISO",
             description="OCISO Inheritable Controls",
-            supported_catalog_versions=[Catalog.Version.CMS_ARS_3_1],
+            supported_catalog_versions=[Catalog.Version.NIST_SP80053r5],
             search_terms=[],
             type="software",
             component_json=TEST_COMPONENT_JSON_BLOB,
@@ -802,7 +802,7 @@ class ProjectSspDownload(AuthenticatedAPITestCase):
         cls.test_project = Project.objects.create(
             title="Pretty Ordinary Project",
             acronym="POP",
-            catalog_version=Catalog.Version.CMS_ARS_3_1,
+            catalog_version=Catalog.Version.NIST_SP80053r5,
             impact_level=Project.ImpactLevel.LOW,
             location="other",
             creator=user,

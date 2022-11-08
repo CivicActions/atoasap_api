@@ -2,7 +2,7 @@ import re
 import uuid
 from typing import List
 
-from blueprintapi.oscal.oscal import Metadata, Property
+from blueprintapi.oscal.oscal import Metadata, Property, Resource
 from blueprintapi.oscal.ssp import (
     BackMatter,
     ByComponent,
@@ -14,7 +14,6 @@ from blueprintapi.oscal.ssp import (
     InformationType,
     Model,
     NetworkDiagram,
-    Resource,
     Role,
     SecurityImpactLevel,
     SystemCharacteristics,

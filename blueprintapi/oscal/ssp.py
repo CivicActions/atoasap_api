@@ -6,7 +6,7 @@ from uuid import UUID, uuid4
 
 from pydantic import Field
 
-from .oscal import (
+from blueprintapi.oscal.oscal import (
     Annotation,
     BackMatter,
     Link,

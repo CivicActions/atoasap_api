@@ -242,7 +242,7 @@ class ProjectSspDownloadView(
         data = ssp.get_ssp()
         file = ContentFile(data)
 
-        response = HttpResponse(FileWrapper(file), "application/json")
+        response = HttpResponse(FileWrapper(file), "application/json", status=200)
         response["Content-Length"] = file.size
         response[
             "Content-Disposition"
