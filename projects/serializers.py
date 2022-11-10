@@ -160,6 +160,9 @@ class ProjectControlSerializer(serializers.ModelSerializer):
         if status := validated_data.get("status"):
             instance.status = status
 
+        if remarks := validated_data.get("remarks"):
+            instance.remarks = remarks
+
         instance.save()
 
         return instance
