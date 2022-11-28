@@ -38,8 +38,9 @@ class ComponentTools:
         components = self.get_components()
         for component in components:
             if (
-                "control-implementations" in component
-            ):  # pylint: disable=unsupported-membership-test
+                "control-implementations"
+                in component  # pylint: disable=unsupported-membership-test
+            ):
                 impls = component.get("control-implementations")
         return impls
 
