@@ -36,8 +36,10 @@ class ComponentTools:
     def get_implementations(self) -> List[dict]:
         impls = []
         components = self.get_components()
-        for component in components:  # pylint: disable=unsupported-membership-test
-            if "control-implementations" in component:
+        for component in components:
+            if (
+                "control-implementations" in component
+            ):  # pylint: disable=unsupported-membership-test
                 impls = component.get("control-implementations")
         return impls
 
