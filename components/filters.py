@@ -23,7 +23,7 @@ class ComponentFilter(filters.FilterSet):
             Q(title__icontains=value) | Q(description__icontains=value)
         )
 
-    def filter_version(self, queryset, name, value):
+    def filter_version(self, queryset, name, value):  # pylint: disable=unused-argument
         return queryset.filter(supported_catalog_versions__overlap=[value])
 
 

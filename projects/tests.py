@@ -32,7 +32,7 @@ TEST_COMPONENT_JSON_BLOB = {
                     {
                         "uuid": "f94a7f03-6ac5-4386-98eb-fa0392f26a1c",
                         "source": "https://raw.githubusercontent.com/NIST/catalog.json",
-                        "description": Catalog.Version.NIST_SP80053r5,
+                        "description": Catalog.Version.NIST_SP80053R5,
                         "implemented-requirements": [
                             {
                                 "uuid": "6698d762-5cdc-452e-9f9e-3074df5292c6",
@@ -78,7 +78,7 @@ class ProjectModelTest(TestCase):
             "load_catalog",
             name="NIST Test Catalog",
             catalog_file="blueprintapi/testdata/NIST_SP-800-53_rev5_test.json",
-            catalog_version=Catalog.Version.NIST_SP80053r5,
+            catalog_version=Catalog.Version.NIST_SP80053R5,
             impact_level=Catalog.ImpactLevel.LOW,
         )
 
@@ -87,7 +87,7 @@ class ProjectModelTest(TestCase):
         cls.test_project = Project.objects.create(
             title="Pretty Ordinary Project",
             acronym="POP",
-            catalog_version=Catalog.Version.NIST_SP80053r5,
+            catalog_version=Catalog.Version.NIST_SP80053R5,
             impact_level=Project.ImpactLevel.LOW,
             location="other",
             creator=user,
@@ -121,7 +121,7 @@ class ProjectListCreateViewTestCase(AuthenticatedAPITestCase):
             creator=user,
             title="MyProject",
             acronym="MP",
-            catalog_version=Catalog.Version.NIST_SP80053r5,
+            catalog_version=Catalog.Version.NIST_SP80053R5,
             impact_level=Project.ImpactLevel.LOW,
             location="other",
         )
@@ -134,7 +134,7 @@ class ProjectListCreateViewTestCase(AuthenticatedAPITestCase):
             creator=user,
             title="MyProject2",
             acronym="MP2",
-            catalog_version=Catalog.Version.NIST_SP80053r5,
+            catalog_version=Catalog.Version.NIST_SP80053R5,
             impact_level=Project.ImpactLevel.LOW,
             location="other",
         )
@@ -143,13 +143,13 @@ class ProjectListCreateViewTestCase(AuthenticatedAPITestCase):
         test_cases = (
             {
                 "acronym": "NTP",
-                "catalog_version": Catalog.Version.NIST_SP80053r5,
+                "catalog_version": Catalog.Version.NIST_SP80053R5,
                 "impact_level": "low",
                 "location": "other",
             },
             {
                 "title": "No Acronym Project",
-                "catalog_version": Catalog.Version.NIST_SP80053r5,
+                "catalog_version": Catalog.Version.NIST_SP80053R5,
                 "impact_level": "low",
                 "location": "other",
             },
@@ -173,12 +173,12 @@ class ProjectListCreateViewTestCase(AuthenticatedAPITestCase):
             {
                 "title": "Test project",
                 "acronym": "TP",
-                "catalog_version": Catalog.Version.NIST_SP80053r5,
+                "catalog_version": Catalog.Version.NIST_SP80053R5,
                 "impact_level": Project.ImpactLevel.LOW,
                 "location": "other",
                 "catalog": (
                     Catalog.objects.get(
-                        version=Catalog.Version.NIST_SP80053r5,
+                        version=Catalog.Version.NIST_SP80053R5,
                         impact_level=Catalog.ImpactLevel.LOW,
                     ).id
                 ),
@@ -186,12 +186,12 @@ class ProjectListCreateViewTestCase(AuthenticatedAPITestCase):
             {
                 "title": "Other Test project",
                 "acronym": "OTP",
-                "catalog_version": Catalog.Version.NIST_SP80053r5,
+                "catalog_version": Catalog.Version.NIST_SP80053R5,
                 "impact_level": Project.ImpactLevel.LOW,
                 "location": "other",
                 "catalog": (
                     Catalog.objects.get(
-                        version=Catalog.Version.NIST_SP80053r5,
+                        version=Catalog.Version.NIST_SP80053R5,
                         impact_level=Catalog.ImpactLevel.LOW,
                     ).id
                 ),
@@ -243,7 +243,7 @@ class ProjectComponentsTest(AuthenticatedAPITestCase):
             "load_catalog",
             name="NIST Test Catalog",
             catalog_file="blueprintapi/testdata/NIST_SP-800-53_rev5_test.json",
-            catalog_version=Catalog.Version.NIST_SP80053r5,
+            catalog_version=Catalog.Version.NIST_SP80053R5,
             impact_level=Catalog.ImpactLevel.LOW,
         )
 
@@ -252,7 +252,7 @@ class ProjectComponentsTest(AuthenticatedAPITestCase):
         test_component = Component.objects.create(
             title="Cool Component",
             description="Probably the coolest component you ever did see. It's magical.",
-            supported_catalog_versions=[Catalog.Version.NIST_SP80053r5],
+            supported_catalog_versions=[Catalog.Version.NIST_SP80053R5],
             search_terms=["cool", "magic", "software"],
             type="software",
             component_json=TEST_COMPONENT_JSON_BLOB,
@@ -261,7 +261,7 @@ class ProjectComponentsTest(AuthenticatedAPITestCase):
         test_component_2 = Component.objects.create(
             title="Cool Components",
             description="Probably the coolest component you ever did see. It's magical.",
-            supported_catalog_versions=[Catalog.Version.NIST_SP80053r5],
+            supported_catalog_versions=[Catalog.Version.NIST_SP80053R5],
             search_terms=["cool", "magic", "software"],
             type="software",
             component_json=TEST_COMPONENT_JSON_BLOB,
@@ -270,7 +270,7 @@ class ProjectComponentsTest(AuthenticatedAPITestCase):
         test_project = Project.objects.create(
             title="Pretty Ordinary Project",
             acronym="POP",
-            catalog_version=Catalog.Version.NIST_SP80053r5,
+            catalog_version=Catalog.Version.NIST_SP80053R5,
             impact_level=Project.ImpactLevel.LOW,
             location="other",
             creator=test_user,
@@ -314,7 +314,7 @@ class ProjectAddComponentViewTest(AuthenticatedAPITestCase):
         cls.test_project_rev5 = Project.objects.create(
             title="Ordinary Rev 5 Project",
             acronym="POP",
-            catalog_version=Catalog.Version.NIST_SP80053r5,
+            catalog_version=Catalog.Version.NIST_SP80053R5,
             impact_level="low",
             location="other",
             creator=test_user,
@@ -323,20 +323,20 @@ class ProjectAddComponentViewTest(AuthenticatedAPITestCase):
         cls.test_project_rev4 = Project.objects.create(
             title="Ordinary Rev 4 Project ",
             acronym="POP2",
-            catalog_version=Catalog.Version.NIST_SP80053r4,
+            catalog_version=Catalog.Version.NIST_SP80053R4,
             impact_level="low",
             location="other",
             creator=test_user,
         )
 
         cls.test_component_rev5 = Component.objects.filter(
-            supported_catalog_versions=[Catalog.Version.NIST_SP80053r5]
+            supported_catalog_versions=[Catalog.Version.NIST_SP80053R5]
         ).first()
 
         cls.test_component_rev4 = Component.objects.create(
             title="New Cool Component",
             description="Probably the coolest component you ever did see. It's magical.",
-            supported_catalog_versions=[Catalog.Version.NIST_SP80053r4],
+            supported_catalog_versions=[Catalog.Version.NIST_SP80053R4],
             search_terms=["cool", "magic", "software"],
             type="software",
             component_json=TEST_COMPONENT_JSON_BLOB,
@@ -417,7 +417,7 @@ class ProjectControlPage(AuthenticatedAPITestCase):
             "load_catalog",
             name="NIST Test Catalog",
             catalog_file="blueprintapi/testdata/NIST_SP-800-53_rev5_test.json",
-            catalog_version=Catalog.Version.NIST_SP80053r5,
+            catalog_version=Catalog.Version.NIST_SP80053R5,
             impact_level=Catalog.ImpactLevel.LOW,
         )
 
@@ -426,7 +426,7 @@ class ProjectControlPage(AuthenticatedAPITestCase):
         test_component = Component.objects.create(
             title="Cool Component",
             description="Probably the coolest component you ever did see. It's magical.",
-            supported_catalog_versions=[Catalog.Version.NIST_SP80053r5],
+            supported_catalog_versions=[Catalog.Version.NIST_SP80053R5],
             search_terms=["cool", "magic", "software"],
             type="software",
             component_json=TEST_COMPONENT_JSON_BLOB,
@@ -435,7 +435,7 @@ class ProjectControlPage(AuthenticatedAPITestCase):
         test_component_2 = Component.objects.create(
             title="Cool Components",
             description="Probably the coolest component you ever did see. It's magical.",
-            supported_catalog_versions=[Catalog.Version.NIST_SP80053r5],
+            supported_catalog_versions=[Catalog.Version.NIST_SP80053R5],
             search_terms=["cool", "magic", "software"],
             type="software",
             component_json=TEST_COMPONENT_JSON_BLOB,
@@ -444,7 +444,7 @@ class ProjectControlPage(AuthenticatedAPITestCase):
         test_project = Project.objects.create(
             title="Pretty Ordinary Project",
             acronym="POP",
-            catalog_version=Catalog.Version.NIST_SP80053r5,
+            catalog_version=Catalog.Version.NIST_SP80053R5,
             impact_level=Project.ImpactLevel.LOW,
             location="other",
             creator=test_user,
@@ -497,7 +497,7 @@ class ProjectComponentSearchViewTest(AuthenticatedAPITestCase):
             "load_catalog",
             name="NIST Test Catalog",
             catalog_file="blueprintapi/testdata/NIST_SP-800-53_rev5_test.json",
-            catalog_version=Catalog.Version.NIST_SP80053r5,
+            catalog_version=Catalog.Version.NIST_SP80053R5,
             impact_level=Catalog.ImpactLevel.LOW,
         )
 
@@ -506,7 +506,7 @@ class ProjectComponentSearchViewTest(AuthenticatedAPITestCase):
         test_component = Component.objects.create(
             title="Cool Component",
             description="Probably the coolest component you ever did see. It's magical.",
-            supported_catalog_versions=[Catalog.Version.NIST_SP80053r5],
+            supported_catalog_versions=[Catalog.Version.NIST_SP80053R5],
             search_terms=["cool", "magic", "software"],
             type="software",
             component_json=TEST_COMPONENT_JSON_BLOB,
@@ -514,7 +514,7 @@ class ProjectComponentSearchViewTest(AuthenticatedAPITestCase):
         test_component_2 = Component.objects.create(
             title="New Cool Component",
             description="Probably the coolest component you ever did see. It's magical.",
-            supported_catalog_versions=[Catalog.Version.NIST_SP80053r5],
+            supported_catalog_versions=[Catalog.Version.NIST_SP80053R5],
             search_terms=["cool", "magic", "software"],
             type="policy",
             component_json=TEST_COMPONENT_JSON_BLOB,
@@ -522,7 +522,7 @@ class ProjectComponentSearchViewTest(AuthenticatedAPITestCase):
         test_project = Project.objects.create(
             title="Pretty Ordinary Project",
             acronym="POP",
-            catalog_version=Catalog.Version.NIST_SP80053r5,
+            catalog_version=Catalog.Version.NIST_SP80053R5,
             impact_level=Project.ImpactLevel.LOW,
             location="other",
             creator=test_user,
@@ -567,7 +567,7 @@ class ProjectComponentNotAddedListViewTest(AuthenticatedAPITestCase):
             "load_catalog",
             name="NIST Test Catalog",
             catalog_file="blueprintapi/testdata/NIST_SP-800-53_rev5_test.json",
-            catalog_version=Catalog.Version.NIST_SP80053r5,
+            catalog_version=Catalog.Version.NIST_SP80053R5,
             impact_level=Catalog.ImpactLevel.LOW,
         )
 
@@ -576,7 +576,7 @@ class ProjectComponentNotAddedListViewTest(AuthenticatedAPITestCase):
         Component.objects.create(
             title="Cool Component",
             description="Probably the coolest component you ever did see. It's magical.",
-            supported_catalog_versions=[Catalog.Version.NIST_SP80053r5],
+            supported_catalog_versions=[Catalog.Version.NIST_SP80053R5],
             search_terms=["cool", "magic", "software"],
             type="software",
             component_json=TEST_COMPONENT_JSON_BLOB,
@@ -584,7 +584,7 @@ class ProjectComponentNotAddedListViewTest(AuthenticatedAPITestCase):
         Component.objects.create(
             title="New Cool Component",
             description="Probably the coolest component you ever did see. It's magical.",
-            supported_catalog_versions=[Catalog.Version.NIST_SP80053r5],
+            supported_catalog_versions=[Catalog.Version.NIST_SP80053R5],
             search_terms=["cool", "magic", "software"],
             type="policy",
             component_json=TEST_COMPONENT_JSON_BLOB,
@@ -592,7 +592,7 @@ class ProjectComponentNotAddedListViewTest(AuthenticatedAPITestCase):
         Component.objects.create(
             title="private component",
             description="Probably the coolest component you ever did see. It's magical.",
-            supported_catalog_versions=[Catalog.Version.NIST_SP80053r5],
+            supported_catalog_versions=[Catalog.Version.NIST_SP80053R5],
             search_terms=["cool", "magic", "software"],
             type="policy",
             component_json=TEST_COMPONENT_JSON_BLOB,
@@ -601,7 +601,7 @@ class ProjectComponentNotAddedListViewTest(AuthenticatedAPITestCase):
         cls.test_project = Project.objects.create(
             title="Pretty Ordinary Project",
             acronym="POP",
-            catalog_version=Catalog.Version.NIST_SP80053r5,
+            catalog_version=Catalog.Version.NIST_SP80053R5,
             impact_level=Project.ImpactLevel.LOW,
             location="other",
             creator=test_user,
@@ -635,7 +635,7 @@ class RetrieveUpdateProjectControlViewTestCase(AuthenticatedAPITestCase):
         project = Project.objects.create(
             title="Test project",
             acronym="TP",
-            catalog_version=Catalog.Version.NIST_SP80053r5,
+            catalog_version=Catalog.Version.NIST_SP80053R5,
             impact_level=Project.ImpactLevel.LOW,
             location="other",
             creator=user,
@@ -784,7 +784,7 @@ class ProjectSspDownload(AuthenticatedAPITestCase):
             "load_catalog",
             name="NIST Test Catalog",
             catalog_file="blueprintapi/testdata/NIST_SP-800-53_rev5_test.json",
-            catalog_version=Catalog.Version.NIST_SP80053r5,
+            catalog_version=Catalog.Version.NIST_SP80053R5,
             impact_level=Catalog.ImpactLevel.LOW,
         )
 
@@ -793,7 +793,7 @@ class ProjectSspDownload(AuthenticatedAPITestCase):
         cls.test_component = Component.objects.create(
             title="OCISO",
             description="OCISO Inheritable Controls",
-            supported_catalog_versions=[Catalog.Version.NIST_SP80053r5],
+            supported_catalog_versions=[Catalog.Version.NIST_SP80053R5],
             search_terms=[],
             type="software",
             component_json=TEST_COMPONENT_JSON_BLOB,
@@ -802,7 +802,7 @@ class ProjectSspDownload(AuthenticatedAPITestCase):
         cls.test_project = Project.objects.create(
             title="Pretty Ordinary Project",
             acronym="POP",
-            catalog_version=Catalog.Version.NIST_SP80053r5,
+            catalog_version=Catalog.Version.NIST_SP80053R5,
             impact_level=Project.ImpactLevel.LOW,
             location="other",
             creator=user,

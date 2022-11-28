@@ -28,8 +28,8 @@ class Catalog(models.Model):
         HIGH = "high", _("High")
 
     class Version(models.TextChoices):
-        NIST_SP80053r5 = "NIST_SP80053r5", _("NIST 800-53 r5")
-        NIST_SP80053r4 = "NIST_SP80053r4", _("NIST 800-53 r4")
+        NIST_SP80053R5 = "NIST_SP80053r5", _("NIST 800-53 r5")
+        NIST_SP80053R4 = "NIST_SP80053r4", _("NIST 800-53 r4")
 
     name = models.CharField(max_length=100, help_text="Name of Catalog", unique=True)
     file_name = models.FileField(
@@ -47,7 +47,7 @@ class Catalog(models.Model):
         choices=Version.choices,
         max_length=24,
         blank=False,
-        default=Version.NIST_SP80053r5,
+        default=Version.NIST_SP80053R5,
     )
     impact_level = models.CharField(
         choices=ImpactLevel.choices,
