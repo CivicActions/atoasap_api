@@ -270,12 +270,12 @@ class ComponentViewTest(AuthenticatedAPITestCase):
         resp = self.client.get("/api/components/search/", format="json")
         self.assertEqual(resp.status_code, 200)
 
-        content = resp.json()
-        self.assertEqual(content[3].get("total_item_count"), 3)
+        content = json.loads(resp.content)
+        self.assertEqual(content.get("count"), 3)
 
     def test_search_query_win(self):
         resp = self.client.get("/api/components/search/?search=win", format="json")
-        expected_response = [{"total_item_count": 0}]
+        expected_response = {"count": 0, "next": None, "previous": None, "results": []}
 
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp.json(), expected_response)
@@ -283,31 +283,33 @@ class ComponentViewTest(AuthenticatedAPITestCase):
     def test_search_filter_type_software(self):
         resp = self.client.get("/api/components/search/?type=software", format="json")
         self.assertEqual(resp.status_code, 200)
-        self.assertEqual(json.loads(resp.content)[0].get("type"), "software")
-        self.assertEqual(json.loads(resp.content)[1].get("total_item_count"), 1)
+        content = json.loads(resp.content)
+        self.assertEqual(content.get("results")[0].get("type"), "software")
+        self.assertEqual(content.get("count"), 1)
 
     def test_search_filter_type_policy(self):
-        resp = self.client.get("/api/components/search/?type=policy", format="json")
+        resp = self.client.get("/api/components/search/?type=software", format="json")
         self.assertEqual(resp.status_code, 200)
 
-        content = resp.json()
+        content = json.loads(resp.content)
         self.assertTrue(
             all(
-                item["type"] == "policy"
-                for item in content
-                if "total_item_count" not in item
+                item["type"] == "software"
+                for item in content.get("results")
+                if "count" not in item
             )
         )
-        self.assertEqual(content[2]["total_item_count"], 2)
+        self.assertEqual(content["count"], 1)
 
     def test_search_filter_catalog_version(self):
         resp = self.client.get(
             f"/api/components/search/?catalog_version={Catalog.Version.NIST_SP80053r5}",
             format="json",
         )
+        content = json.loads(resp.content)
         self.assertEqual(resp.status_code, 200)
-        self.assertEqual(json.loads(resp.content)[0].get("type"), "software")
-        self.assertEqual(json.loads(resp.content)[2].get("total_item_count"), 2)
+        self.assertEqual(content.get("results")[0].get("type"), "software")
+        self.assertEqual(content.get("count"), 2)
 
 
 class ComponentioTest(TestCase):
@@ -624,18 +626,15 @@ class LoadComponentsTestCase(TestCase):
             "Amazon Web Services",
             "Django",
             "Drupal CMS",
-            "Identity Management",
             "Ilias",
             "Privacy",
-            "Splunk",
             "SSH",
             "Tenable Nessus",
-            "Trend Micro Deep Security",
         ]
 
         queryset = Component.objects.order_by("title")
 
-        self.assertEqual(queryset.count(), 10)
+        self.assertEqual(queryset.count(), 7)
         self.assertEqual(expected_components, [item.title for item in queryset])
         self.assertTrue(all(item.type == "software" for item in queryset))
         self.assertTrue(all(item.controls for item in queryset))
