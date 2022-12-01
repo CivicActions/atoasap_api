@@ -90,11 +90,8 @@ COMPONENT_DATA = {
                 "control-implementations": [
                     {
                         "uuid": "8a89220e-c679-4970-904a-e319f92cb8ca",
-                        "source": (
-                            "https://raw.githubusercontent.com/CMSgov/ars-machine-readable/main/3.1/"
-                            "oscal/json/CMS_ARS_3_1_catalog.json"
-                        ),
-                        "description": "CMS_ARS_3_1",
+                        "source": "https://raw.githubusercontent.com/NIST/catalog.json",
+                        "description": "NIST_SP80053r5",
                         "implemented-requirements": [
                             {
                                 "uuid": "809e54d5-1670-45d5-a852-8a34e03d5e95",

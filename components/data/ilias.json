@@ -17,7 +17,7 @@
         "control-implementations": [
           {
             "uuid": "df33f215-5b94-4dff-9759-7440964812af",
-            "source": "https://raw.githubusercontent.com/usnistgov/oscal-content/master/nist.gov/SP800-53/rev5/json/NIST_SP-800-53_rev5_catalog.json",
+            "source": "https://raw.githubusercontent.com/usnistgov/oscal-content/master/nist.gov/SP800-53/rev4/json/NIST_SP-800-53_rev4_catalog.json",
             "description": "NIST_SP80053r5",
             "implemented-requirements": [
               {

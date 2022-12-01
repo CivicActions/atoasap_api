@@ -50,17 +50,17 @@ class LoadCatalogCommandTestCase(TestCase):
         test_cases = [
             {
                 "name": "NIST_SP80053r4_HIGH",
-                "version": f"{Catalog.Version.NIST_SP80053r4}",
+                "version": f"{Catalog.Version.NIST_SP80053R4}",
                 "impact_level": "high",
             },
             {
                 "name": "NIST_SP80053r4_LOW",
-                "version": f"{Catalog.Version.NIST_SP80053r4}",
+                "version": f"{Catalog.Version.NIST_SP80053R4}",
                 "impact_level": "low",
             },
             {
                 "name": "NIST_SP80053r4_MODERATE",
-                "version": f"{Catalog.Version.NIST_SP80053r4}",
+                "version": f"{Catalog.Version.NIST_SP80053R4}",
                 "impact_level": "moderate",
             },
         ]

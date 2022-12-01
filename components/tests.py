@@ -78,7 +78,7 @@ class GetAllComponentsTest(AuthenticatedAPITestCase):
         Component.objects.create(
             title="Cool Component",
             description="Probably the coolest component you ever did see. It's magical.",
-            supported_catalog_versions=[Catalog.Version.NIST_SP80053r5],
+            supported_catalog_versions=[Catalog.Version.NIST_SP80053R5],
             controls=TEST_COMPONENT_CONTROLS,
             search_terms=["cool", "magic", "software"],
             type="software",
@@ -88,7 +88,7 @@ class GetAllComponentsTest(AuthenticatedAPITestCase):
         Component.objects.create(
             title="Another Even Cooler Component",
             description="This one is better.",
-            supported_catalog_versions=[Catalog.Version.NIST_SP80053r5],
+            supported_catalog_versions=[Catalog.Version.NIST_SP80053R5],
             controls=TEST_COMPONENT_CONTROLS,
             search_terms=["cool", "best"],
             type="software",
@@ -123,7 +123,7 @@ class GetSingleComponentTest(AuthenticatedAPITestCase):
         cls.test_component = Component.objects.create(
             title="Cool Component",
             description="Probably the coolest component you ever did see. It's magical.",
-            supported_catalog_versions=[Catalog.Version.NIST_SP80053r5],
+            supported_catalog_versions=[Catalog.Version.NIST_SP80053R5],
             search_terms=["cool", "magic", "software"],
             type="software",
             component_json=TEST_COMPONENT_JSON_BLOB,
@@ -243,7 +243,7 @@ class ComponentViewTest(AuthenticatedAPITestCase):
         cls.test_component = Component.objects.create(
             title="Cool Component",
             description="Probably the coolest component you ever did see. It's magical.",
-            supported_catalog_versions=[Catalog.Version.NIST_SP80053r5],
+            supported_catalog_versions=[Catalog.Version.NIST_SP80053R5],
             search_terms=["cool", "magic", "software"],
             type="software",
             component_json=TEST_COMPONENT_JSON_BLOB,
@@ -251,7 +251,7 @@ class ComponentViewTest(AuthenticatedAPITestCase):
         cls.test_component_2 = Component.objects.create(
             title="testing title",
             description="testing description",
-            supported_catalog_versions=[Catalog.Version.NIST_SP80053r5],
+            supported_catalog_versions=[Catalog.Version.NIST_SP80053R5],
             search_terms=["cool", "magic", "software"],
             type="policy",
             component_json=TEST_COMPONENT_JSON_BLOB,
@@ -260,7 +260,7 @@ class ComponentViewTest(AuthenticatedAPITestCase):
         cls.test_component_3 = Component.objects.create(
             title="testing different catalog",
             description="testing description",
-            supported_catalog_versions=[Catalog.Version.NIST_SP80053r4],
+            supported_catalog_versions=[Catalog.Version.NIST_SP80053R4],
             search_terms=["cool", "magic", "software"],
             type="policy",
             component_json=TEST_COMPONENT_JSON_BLOB,
@@ -270,12 +270,12 @@ class ComponentViewTest(AuthenticatedAPITestCase):
         resp = self.client.get("/api/components/search/", format="json")
         self.assertEqual(resp.status_code, 200)
 
-        content = resp.json()
-        self.assertEqual(content[3].get("total_item_count"), 3)
+        content = json.loads(resp.content)
+        self.assertEqual(content.get("count"), 3)
 
     def test_search_query_win(self):
         resp = self.client.get("/api/components/search/?search=win", format="json")
-        expected_response = [{"total_item_count": 0}]
+        expected_response = {"count": 0, "next": None, "previous": None, "results": []}
 
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp.json(), expected_response)
@@ -283,31 +283,33 @@ class ComponentViewTest(AuthenticatedAPITestCase):
     def test_search_filter_type_software(self):
         resp = self.client.get("/api/components/search/?type=software", format="json")
         self.assertEqual(resp.status_code, 200)
-        self.assertEqual(json.loads(resp.content)[0].get("type"), "software")
-        self.assertEqual(json.loads(resp.content)[1].get("total_item_count"), 1)
+        content = json.loads(resp.content)
+        self.assertEqual(content.get("results")[0].get("type"), "software")
+        self.assertEqual(content.get("count"), 1)
 
     def test_search_filter_type_policy(self):
-        resp = self.client.get("/api/components/search/?type=policy", format="json")
+        resp = self.client.get("/api/components/search/?type=software", format="json")
         self.assertEqual(resp.status_code, 200)
 
-        content = resp.json()
+        content = json.loads(resp.content)
         self.assertTrue(
             all(
-                item["type"] == "policy"
-                for item in content
-                if "total_item_count" not in item
+                item["type"] == "software"
+                for item in content.get("results")
+                if "count" not in item
             )
         )
-        self.assertEqual(content[2]["total_item_count"], 2)
+        self.assertEqual(content["count"], 1)
 
     def test_search_filter_catalog_version(self):
         resp = self.client.get(
-            f"/api/components/search/?catalog_version={Catalog.Version.NIST_SP80053r5}",
+            f"/api/components/search/?catalog_version={Catalog.Version.NIST_SP80053R5}",
             format="json",
         )
+        content = json.loads(resp.content)
         self.assertEqual(resp.status_code, 200)
-        self.assertEqual(json.loads(resp.content)[0].get("type"), "software")
-        self.assertEqual(json.loads(resp.content)[2].get("total_item_count"), 2)
+        self.assertEqual(content.get("results")[0].get("type"), "software")
+        self.assertEqual(content.get("count"), 2)
 
 
 class ComponentioTest(TestCase):
@@ -315,7 +317,7 @@ class ComponentioTest(TestCase):
     def setUpTestData(cls):
         test_component = Component.objects.create(
             title="Cool Component",
-            supported_catalog_versions=[Catalog.Version.NIST_SP80053r5],
+            supported_catalog_versions=[Catalog.Version.NIST_SP80053R5],
             component_json=TEST_COMPONENT_JSON_BLOB,
         )
         cls.tools = ComponentTools(test_component.component_json)
@@ -353,7 +355,7 @@ class ComponentTypesViewTest(AuthenticatedAPITestCase):
         cls.test_component = Component.objects.create(
             title="Cool Component",
             description="Probably the coolest component you ever did see. It's magical.",
-            supported_catalog_versions=[Catalog.Version.NIST_SP80053r5],
+            supported_catalog_versions=[Catalog.Version.NIST_SP80053R5],
             controls=["ac-2.1", "ac-6.10", "ac-8", "au-6.1", "sc-2"],
             search_terms=["cool", "magic", "software"],
             type="software",
@@ -362,7 +364,7 @@ class ComponentTypesViewTest(AuthenticatedAPITestCase):
         cls.test_component_2 = Component.objects.create(
             title="testing title",
             description="testing description",
-            supported_catalog_versions=[Catalog.Version.NIST_SP80053r5],
+            supported_catalog_versions=[Catalog.Version.NIST_SP80053R5],
             controls=["ac-2.1"],
             search_terms=["cool", "magic", "software"],
             type="policy",
@@ -373,7 +375,7 @@ class ComponentTypesViewTest(AuthenticatedAPITestCase):
         Component.objects.create(
             title="Duplicate Type Component",
             description="Component with duplicate type",
-            supported_catalog_versions=[Catalog.Version.NIST_SP80053r5],
+            supported_catalog_versions=[Catalog.Version.NIST_SP80053R5],
             controls=[
                 "ac-2.1",
             ],
@@ -403,7 +405,7 @@ class ComponentTypesViewTest(AuthenticatedAPITestCase):
         Component.objects.create(
             title="Private component",
             description="testing description",
-            supported_catalog_versions=[Catalog.Version.NIST_SP80053r5],
+            supported_catalog_versions=[Catalog.Version.NIST_SP80053R5],
             search_terms=["cool", "magic", "software"],
             type="crazy-type",
             component_json=TEST_COMPONENT_JSON_BLOB,
@@ -428,20 +430,20 @@ class CreateEmptyComponentTest(TestCase):
             Catalog.objects.create(
                 name="NIST Test Catalog",
                 file_name=catalog,
-                version=Catalog.Version.NIST_SP80053r5,
+                version=Catalog.Version.NIST_SP80053R5,
                 impact_level="low",
             )
         title = "Empty Component"
         default_json = create_empty_component_json(
             title=title,
-            catalog_version=Catalog.Version.NIST_SP80053r5,
+            catalog_version=Catalog.Version.NIST_SP80053R5,
             impact_level=Catalog.ImpactLevel.LOW,
         )
         cls.default = Component(
             title=f"{title} private",
             description=f"{title} default system component",
             component_json=json.loads(default_json),
-            supported_catalog_versions=[Catalog.Version.NIST_SP80053r5],
+            supported_catalog_versions=[Catalog.Version.NIST_SP80053R5],
             status=1,
         )
         cls.tools = ComponentTools(cls.default.component_json)
@@ -460,7 +462,7 @@ class ComponentImplementedRequirementViewTest(AuthenticatedAPITestCase):
         test_component = Component.objects.create(
             title="Cool Component",
             description="Probably the coolest component you ever did see. It's magical.",
-            supported_catalog_versions=[Catalog.Version.NIST_SP80053r5],
+            supported_catalog_versions=[Catalog.Version.NIST_SP80053R5],
             controls=["ac-2.1", "ac-6.10", "ac-8", "au-6.1", "sc-2"],
             search_terms=["cool", "magic", "software"],
             type="software",
@@ -624,18 +626,15 @@ class LoadComponentsTestCase(TestCase):
             "Amazon Web Services",
             "Django",
             "Drupal CMS",
-            "Identity Management",
             "Ilias",
             "Privacy",
-            "Splunk",
             "SSH",
             "Tenable Nessus",
-            "Trend Micro Deep Security",
         ]
 
         queryset = Component.objects.order_by("title")
 
-        self.assertEqual(queryset.count(), 10)
+        self.assertEqual(queryset.count(), 7)
         self.assertEqual(expected_components, [item.title for item in queryset])
         self.assertTrue(all(item.type == "software" for item in queryset))
         self.assertTrue(all(item.controls for item in queryset))

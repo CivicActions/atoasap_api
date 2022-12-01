@@ -1,9 +1,15 @@
+import json
+from wsgiref.util import FileWrapper
+
+from django.core.files.base import ContentFile
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
-from django.db.models import Q, Count
+from django.db.models import Count, Q
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django_filters import rest_framework as filters
 from guardian.shortcuts import get_objects_for_user
-from rest_framework import generics, status
+from rest_framework import generics, renderers, status, viewsets
+from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 
@@ -11,20 +17,26 @@ from blueprintapi.filters import ObjectPermissionsFilter
 from components.filters import ComponentFilter
 from components.models import Component
 from components.serializers import ComponentListBasicSerializer
+from projects.downloads import OscalSSP
 from projects.filters import ProjectControlFilter
 from projects.models import Project, ProjectControl
 from projects.permissions import ProjectControlPermissions
 from projects.serializers import (
+    ProjectControlListSerializer,
     ProjectControlSerializer,
     ProjectListSerializer,
-    ProjectSerializer, ProjectControlListSerializer,
+    ProjectSerializer,
 )
 
-n_completed = Count("to_project", filter=Q(to_project__status=ProjectControl.Status.COMPLETE))
+n_completed = Count(
+    "to_project", filter=Q(to_project__status=ProjectControl.Status.COMPLETE)
+)
 total_controls = Count("to_project")
 
 project_queryset = (
-    Project.objects.annotate(completed_controls=n_completed).annotate(total_controls=total_controls).order_by("pk")
+    Project.objects.annotate(completed_controls=n_completed)
+    .annotate(total_controls=total_controls)
+    .order_by("pk")
 )
 
 
@@ -56,15 +68,17 @@ class ProjectAddComponentView(generics.GenericAPIView):
             project.components.add(component.id)
             response = {
                 "message": (
-                    f"{component.title} and {len(component.controls)} control narratives successfully added to "
-                    f"{project.title}."
+                    f"{component.title} and {len(component.controls)} control narratives "
+                    f"successfully added to {project.title}."
                 )
             }
 
             return Response(response, status=status.HTTP_200_OK)
 
         return Response(
-            {"response": "Selected component is not compatible with this project's catalog."},
+            {
+                "response": "Selected component is not compatible with this project's catalog."
+            },
             status=status.HTTP_400_BAD_REQUEST,
         )
 
@@ -94,8 +108,8 @@ class ProjectRemoveComponentView(generics.GenericAPIView):
         return Response(
             {
                 "message": (
-                    f"{component.title} and {len(component.controls)} control narratives successfully removed from "
-                    f"{project.title}."
+                    f"{component.title} and {len(component.controls)} control narratives "
+                    f"successfully removed from {project.title}."
                 )
             },
             status=status.HTTP_200_OK,
@@ -166,7 +180,12 @@ class ProjectGetControlList(generics.ListAPIView):
 
     def get_queryset(self):
         user = self.request.user
-        queryset = get_objects_for_user(user, "projects.view_project", Project.objects.all(), accept_global_perms=False)
+        queryset = get_objects_for_user(
+            user,
+            "projects.view_project",
+            Project.objects.all(),
+            accept_global_perms=False,
+        )
         project = get_object_or_404(queryset, pk=self.kwargs.get("project_id"))
 
         return ProjectControl.objects.filter(project=project).order_by("control_id")
@@ -176,13 +195,56 @@ class RetrieveUpdateProjectControlView(generics.RetrieveUpdateAPIView):
     queryset = ProjectControl.objects.all()
     serializer_class = ProjectControlSerializer
     lookup_url_kwarg = "project_id"
-    permission_classes = [ProjectControlPermissions, ]
+    permission_classes = [
+        ProjectControlPermissions,
+    ]
 
     def get_serializer_context(self) -> dict:
-        return {"control_id": self.kwargs.get("control_id"), **super().get_serializer_context()}
+        return {
+            "control_id": self.kwargs.get("control_id"),
+            **super().get_serializer_context(),
+        }
 
     def get_object(self) -> ProjectControl:
         project = get_object_or_404(Project, pk=self.kwargs.get("project_id"))
         self.check_object_permissions(self.request, project)
 
-        return get_object_or_404(ProjectControl, control__control_id=self.kwargs.get("control_id"), project=project)
+        return get_object_or_404(
+            ProjectControl,
+            control__control_id=self.kwargs.get("control_id"),
+            project=project,
+        )
+
+
+class PassthroughRenderer(
+    renderers.BaseRenderer
+):  # pylint: disable=too-few-public-methods
+    media_type = ""
+    format = ""
+
+    def render(self, data, accepted_media_type=None, renderer_context=None):
+        return data
+
+
+class ProjectSspDownloadView(
+    viewsets.ReadOnlyModelViewSet
+):  # pylint: disable=too-many-ancestors
+    queryset = Project.objects.all()
+
+    @action(methods=["get"], detail=True, renderer_classes=(PassthroughRenderer,))
+    def download(self, *args, **kwargs):
+        project = get_object_or_404(Project, pk=self.kwargs.get("project_id"))
+        self.check_object_permissions(self.request, project)
+
+        with open("projects/project_extra.json") as read_file:
+            extras = json.load(read_file)
+        ssp = OscalSSP(project, extras)
+        data = ssp.get_ssp()
+        file = ContentFile(data)
+
+        response = HttpResponse(FileWrapper(file), "application/json", status=200)
+        response["Content-Length"] = file.size
+        response[
+            "Content-Disposition"
+        ] = f'attachment; filename="{project.title}-ssp.json"'
+        return response

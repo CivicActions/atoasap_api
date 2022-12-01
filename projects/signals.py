@@ -3,6 +3,7 @@ import logging
 
 from django.contrib.auth.models import Group, Permission
 from django.core.exceptions import ValidationError
+from django.db.models import Q
 from guardian.shortcuts import assign_perm
 
 from access_management.permission_constants import PROJECT_ADMIN_GROUP
@@ -52,6 +53,17 @@ def _add_default_component(instance: Project, group: Group):
     instance.components.add(default)
 
 
+def _add_components_by_system_element(instance: Project):
+    try:
+        if instance.location == "aws":
+            aws_component = Component.objects.get(
+                Q(title__exact="AWS") | Q(title__exact="Amazon Web Services")
+            )
+            instance.components.add(aws_component)
+    except Component.DoesNotExist as exc:
+        logger.warning("Inherited components not found: %s", exc)
+
+
 # noinspection PyUnusedLocal
 def post_create_setup(
     sender, instance: Project, created: bool, **kwargs
@@ -74,6 +86,9 @@ def post_create_setup(
 
         # Add catalog controls to project.
         _add_project_controls(instance)
+
+        # Add components
+        _add_components_by_system_element(instance)
 
 
 # noinspection PyUnusedLocal

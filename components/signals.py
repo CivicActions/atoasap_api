@@ -1,6 +1,6 @@
 import json
 
-from blueprintapi.oscal.component import ComponentModel as ComponentModel
+from blueprintapi.oscal.component import ComponentModel
 from components.componentio import ComponentTools
 from components.models import Component
 
