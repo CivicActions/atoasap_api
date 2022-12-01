@@ -3,10 +3,10 @@ from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.exceptions import AuthenticationFailed
-from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 
-from blueprintapi.authentication import ExpiringTokenAuthentication
+from ratoapi.authentication import ExpiringTokenAuthentication
 
 
 @api_view(["GET"])
@@ -17,7 +17,11 @@ def index(request):
 
 
 @api_view(["GET"])
-@permission_classes([IsAuthenticatedOrReadOnly, ])
+@permission_classes(
+    [
+        IsAuthenticatedOrReadOnly,
+    ]
+)
 def healthcheck(request):
     with connection.cursor() as cursor:
         cursor.execute("SELECT 1")
@@ -32,12 +36,16 @@ class UserObtainTokenView(ObtainAuthToken):
     def post(self, request, *args, **kwargs) -> Response:
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        user = serializer.validated_data['user']
+        user = serializer.validated_data["user"]
         token, created = Token.objects.get_or_create(user=user)
         response_data = {
-                'token': token.key,
-                'user': {'username': user.username, 'full_name': user.get_full_name(), 'email': user.email},
-            }
+            "token": token.key,
+            "user": {
+                "username": user.username,
+                "full_name": user.get_full_name(),
+                "email": user.email,
+            },
+        }
 
         if not created:
             auth = ExpiringTokenAuthentication()

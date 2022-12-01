@@ -1,11 +1,11 @@
-from blueprintapi.permissions import StrictDjangoObjectPermissions
+from ratoapi.permissions import StrictDjangoObjectPermissions
 
-
-SAFE_METHODS = ("POST", )
+SAFE_METHODS = ("POST",)
 
 
 class UserPermissions(StrictDjangoObjectPermissions):
     """Permissions class that allows POST operations for the User view."""
+
     def has_permission(self, request, view):
         if request.method in SAFE_METHODS:
             return True

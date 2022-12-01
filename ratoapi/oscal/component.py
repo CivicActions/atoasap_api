@@ -9,7 +9,8 @@ from uuid import UUID, uuid4
 
 from pydantic import Field
 
-from blueprintapi.oscal.oscal import (
+from catalogs.models import Catalog
+from ratoapi.oscal.oscal import (
     BackMatter,
     Link,
     MarkupLine,
@@ -21,7 +22,6 @@ from blueprintapi.oscal.oscal import (
     Property,
     ResponsibleRole,
 )
-from catalogs.models import Catalog
 
 
 class ComponentTypeEnum(str, Enum):

@@ -1,7 +1,7 @@
 from django.http import Http404
 from rest_framework.permissions import SAFE_METHODS
 
-from blueprintapi.permissions import StrictDjangoObjectPermissions
+from ratoapi.permissions import StrictDjangoObjectPermissions
 
 
 class ProjectControlPermissions(StrictDjangoObjectPermissions):
@@ -10,6 +10,7 @@ class ProjectControlPermissions(StrictDjangoObjectPermissions):
     This is specific to project control where ProjectControl object permissions should be effectively "inherited" based
     on a user's project permission.
     """
+
     def has_object_permission(self, request, view, obj):
         model_cls = obj.__class__
         user = request.user
@@ -26,7 +27,7 @@ class ProjectControlPermissions(StrictDjangoObjectPermissions):
                 # to make another lookup.
                 raise Http404
 
-            read_perms = self.get_required_object_permissions('GET', model_cls)
+            read_perms = self.get_required_object_permissions("GET", model_cls)
             if not user.has_perms(read_perms, obj):
                 raise Http404
 

@@ -11,7 +11,7 @@ from pydantic import (  # pylint: disable=no-name-in-module
     validator,
 )
 
-from blueprintapi.oscal.oscal import Link, Metadata, OSCALElement, Parameter, Property
+from ratoapi.oscal.oscal import Link, Metadata, OSCALElement, Parameter, Property
 
 logger = logging.getLogger(__name__)
 

@@ -2,9 +2,9 @@
 import json
 from typing import Any, List, Optional, Union
 
-from blueprintapi.oscal import component as oscal_component
-from blueprintapi.oscal.oscal import Metadata
 from catalogs.models import Catalog
+from ratoapi.oscal import component as oscal_component
+from ratoapi.oscal.oscal import Metadata
 
 
 class ComponentTools:

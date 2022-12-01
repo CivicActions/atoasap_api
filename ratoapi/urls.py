@@ -1,4 +1,4 @@
-"""blueprintapi URL Configuration
+"""ratoapi URL Configuration
 
 The `urlpatterns` list routes URLs to views. For more information please see:
     https://docs.djangoproject.com/en/3.2/topics/http/urls/
@@ -39,14 +39,16 @@ SchemaView = get_schema_view(
     ),
     generator_class=CustomSchemaGenerator,
     public=True,
-    permission_classes=[permissions.AllowAny, ],
+    permission_classes=[
+        permissions.AllowAny,
+    ],
 )
 
 urlpatterns = [
     path("", views.index, name="index"),
     path("api-auth/", include("rest_framework.urls", namespace="rest_framework")),
     path("admin/", admin.site.urls),
-    path('api-token-auth/', views.UserObtainTokenView.as_view()),
+    path("api-token-auth/", views.UserObtainTokenView.as_view()),
     path("api/catalogs/", include("catalogs.urls")),
     path("api/components/", include("components.urls")),
     path("api/projects/", include("projects.urls")),

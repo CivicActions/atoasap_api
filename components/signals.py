@@ -1,8 +1,8 @@
 import json
 
-from blueprintapi.oscal.component import ComponentModel
 from components.componentio import ComponentTools
 from components.models import Component
+from ratoapi.oscal.component import ComponentModel
 
 
 # noinspection PyUnusedLocal
