@@ -425,7 +425,7 @@ class ComponentTypesViewTest(AuthenticatedAPITestCase):
 class CreateEmptyComponentTest(TestCase):
     @classmethod
     def setUpTestData(cls):
-        with open("blueprintapi/testdata/NIST_SP-800-53_rev5_test.json", "rb") as file:
+        with open("ratoapi/testdata/NIST_SP-800-53_rev5_test.json", "rb") as file:
             catalog = File(file)
             Catalog.objects.create(
                 name="NIST Test Catalog",

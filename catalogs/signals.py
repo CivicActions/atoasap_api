@@ -1,7 +1,7 @@
 import os
 
-from blueprintapi.oscal.catalog import CatalogModel
 from catalogs.models import Catalog, Controls
+from ratoapi.oscal.catalog import CatalogModel
 
 
 # noinspection PyUnusedLocal

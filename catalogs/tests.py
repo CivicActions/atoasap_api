@@ -12,7 +12,7 @@ from testing_utils import AuthenticatedAPITestCase, prevent_request_warnings
 class CatalogModelTest(AuthenticatedAPITestCase):
     def setUp(self):
         super().setUp()
-        with open("blueprintapi/testdata/NIST_SP-800-53_rev5_test.json", "rb") as file:
+        with open("ratoapi/testdata/NIST_SP-800-53_rev5_test.json", "rb") as file:
             catalog = File(file)
             self.cat = Catalog.objects.create(
                 name="NIST Test Catalog",

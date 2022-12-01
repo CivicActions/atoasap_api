@@ -77,7 +77,7 @@ class ProjectModelTest(TestCase):
         call_command(
             "load_catalog",
             name="NIST Test Catalog",
-            catalog_file="blueprintapi/testdata/NIST_SP-800-53_rev5_test.json",
+            catalog_file="ratoapi/testdata/NIST_SP-800-53_rev5_test.json",
             catalog_version=Catalog.Version.NIST_SP80053R5,
             impact_level=Catalog.ImpactLevel.LOW,
         )
@@ -242,7 +242,7 @@ class ProjectComponentsTest(AuthenticatedAPITestCase):
         call_command(
             "load_catalog",
             name="NIST Test Catalog",
-            catalog_file="blueprintapi/testdata/NIST_SP-800-53_rev5_test.json",
+            catalog_file="ratoapi/testdata/NIST_SP-800-53_rev5_test.json",
             catalog_version=Catalog.Version.NIST_SP80053R5,
             impact_level=Catalog.ImpactLevel.LOW,
         )
@@ -416,7 +416,7 @@ class ProjectControlPage(AuthenticatedAPITestCase):
         call_command(
             "load_catalog",
             name="NIST Test Catalog",
-            catalog_file="blueprintapi/testdata/NIST_SP-800-53_rev5_test.json",
+            catalog_file="ratoapi/testdata/NIST_SP-800-53_rev5_test.json",
             catalog_version=Catalog.Version.NIST_SP80053R5,
             impact_level=Catalog.ImpactLevel.LOW,
         )
@@ -496,7 +496,7 @@ class ProjectComponentSearchViewTest(AuthenticatedAPITestCase):
         call_command(
             "load_catalog",
             name="NIST Test Catalog",
-            catalog_file="blueprintapi/testdata/NIST_SP-800-53_rev5_test.json",
+            catalog_file="ratoapi/testdata/NIST_SP-800-53_rev5_test.json",
             catalog_version=Catalog.Version.NIST_SP80053R5,
             impact_level=Catalog.ImpactLevel.LOW,
         )
@@ -566,7 +566,7 @@ class ProjectComponentNotAddedListViewTest(AuthenticatedAPITestCase):
         call_command(
             "load_catalog",
             name="NIST Test Catalog",
-            catalog_file="blueprintapi/testdata/NIST_SP-800-53_rev5_test.json",
+            catalog_file="ratoapi/testdata/NIST_SP-800-53_rev5_test.json",
             catalog_version=Catalog.Version.NIST_SP80053R5,
             impact_level=Catalog.ImpactLevel.LOW,
         )
@@ -783,7 +783,7 @@ class ProjectSspDownload(AuthenticatedAPITestCase):
         call_command(
             "load_catalog",
             name="NIST Test Catalog",
-            catalog_file="blueprintapi/testdata/NIST_SP-800-53_rev5_test.json",
+            catalog_file="ratoapi/testdata/NIST_SP-800-53_rev5_test.json",
             catalog_version=Catalog.Version.NIST_SP80053R5,
             impact_level=Catalog.ImpactLevel.LOW,
         )

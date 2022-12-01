@@ -2,12 +2,12 @@ from typing import Optional
 
 from rest_framework import serializers
 
-from blueprintapi.oscal.catalog import CatalogModel
-from blueprintapi.oscal.component import ComponentModel
 from catalogs.serializers import ControlSerializer
 from components.models import Component
 from components.serializers import ComponentListSerializer
 from projects.models import Project, ProjectControl
+from ratoapi.oscal.catalog import CatalogModel
+from ratoapi.oscal.component import ComponentModel
 
 
 class ProjectListSerializer(serializers.ModelSerializer):

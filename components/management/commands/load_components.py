@@ -4,8 +4,8 @@ from pathlib import Path
 from django.core.management.base import BaseCommand, CommandError
 from pydantic import ValidationError
 
-from blueprintapi.oscal.component import ComponentModel
 from components.models import Component
+from ratoapi.oscal.component import ComponentModel
 
 
 class Command(BaseCommand):

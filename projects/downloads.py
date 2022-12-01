@@ -2,8 +2,10 @@ import re
 import uuid
 from typing import List
 
-from blueprintapi.oscal.oscal import Metadata, Property, Resource
-from blueprintapi.oscal.ssp import (
+from components.componentio import ComponentTools
+from projects.models import Project
+from ratoapi.oscal.oscal import Metadata, Property, Resource
+from ratoapi.oscal.ssp import (
     BackMatter,
     ByComponent,
     Component,
@@ -24,8 +26,6 @@ from blueprintapi.oscal.ssp import (
     SystemStatus,
     User,
 )
-from components.componentio import ComponentTools
-from projects.models import Project
 
 
 class OscalSSP:

@@ -13,7 +13,6 @@ from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 
-from blueprintapi.filters import ObjectPermissionsFilter
 from components.filters import ComponentFilter
 from components.models import Component
 from components.serializers import ComponentListBasicSerializer
@@ -27,6 +26,7 @@ from projects.serializers import (
     ProjectListSerializer,
     ProjectSerializer,
 )
+from ratoapi.filters import ObjectPermissionsFilter
 
 n_completed = Count(
     "to_project", filter=Q(to_project__status=ProjectControl.Status.COMPLETE)
